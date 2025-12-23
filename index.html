@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task management</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
@@ -21,7 +22,93 @@
         <nav class="nav-contain">Navigation</nav>
         <div class="main-content-container">
             <div class="main-top">Main-top</div>
-            <main class="mian-button">Main-button</main>
+            <main class="mian-button"> <b>Task Table</b>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="boder_th">NO</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Category</th>
+                                <th>Due Date</th>
+                                <th>Action</th>
+                                <th class="boder-remark">Remark</th>
+                            </tr>
+                        </thead>
+    
+                        <tbody>
+                            <tr>
+                                <td >1</td>
+                                <td>Sample Task</td>
+                                <td>
+                                    <select class="status-select">
+                                        <option value="" selected disabled>select here...</option>
+                                        <option value="todo">Todo</option>
+                                        <option value="in-progress">In Progress</option>
+                                        <option value="done">Done</option>
+                                    </select>
+    
+                                </td>
+                                <td>
+                                    <select class="select">
+                                        <option value="" selected disabled>select here...</option>
+                                        <option value="todo">High</option>
+                                        <option value="in-progress">Medium</option>
+                                        <option value="done">Low</option>
+                                    </select>
+                                </td>
+                                <td>Work</td>
+                                <td>2025-01-01</td>
+                                <td>
+                                    <button class="edit-btn">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </button>
+    
+                                    <button class="delete-btn">
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                </td>
+    
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td class="boder-td">1</td>
+                                <td>Sample Task</td>
+                                <td>
+                                    <select class="status-select">
+                                        <option value="" selected disabled>select here...</option>
+                                        <option value="todo">Todo</option>
+                                        <option value="in-progress">In Progress</option>
+                                        <option value="done">Done</option>
+                                    </select>
+    
+                                </td>
+                                <td>
+                                    <select class="select">
+                                        <option value="" selected disabled>select here...</option>
+                                        <option value="todo">High</option>
+                                        <option value="in-progress">Medium</option>
+                                        <option value="done">Low</option>
+                                    </select>
+                                </td>
+                                <td>Work</td>
+                                <td>2025-01-01</td>
+                                <td>
+                                    <button class="edit-btn">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </button>
+    
+                                    <button class="delete-btn">
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                </td>
+    
+                                <td class="boder-right">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+            </main>
         </div>
     </div>
 </body>
