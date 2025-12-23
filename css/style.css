@@ -1,0 +1,70 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100%;
+}
+
+/* NAVIGATION */
+.header-container {
+    display: flex;
+    background: rgba(127, 255, 212, 0.249);
+}
+
+/* Menu BUTTON */
+
+.header-left {
+    flex: 1;
+    background: thistle;
+    text-align: center;
+}
+
+/* Title */
+
+.header-right {
+    flex: 6;
+}
+
+/* HEADER-CONTAINER */
+
+.main-container {
+    display: flex;
+    justify-content: space-around;
+    height: 100vh;
+    text-align: center;
+}
+
+/* HEADWE */
+.nav-contain {
+    background: rgba(0, 0, 255, 0.327);
+    flex: 1;
+    border-radius: 14px;
+    margin: 8px 0px 8px 8px;
+}
+
+/* MAIN */
+.main-content-container {
+    flex: 6;
+    display: flex;
+    flex-direction: column;
+    
+}
+
+/* MAIN-TOP */
+.main-top {
+    flex: 1;
+    background: rgba(240, 128, 128, 0.434);
+    border-radius: 14px;
+    margin: 8px;
+    margin-bottom: 0px;
+    
+}
+
+
+/* MAIN-BUTTON */
+.mian-button {
+    flex: 2;
+    background: rgba(255, 192, 203, 0.419);
+    border-radius: 14px;
+    margin: 8px;
+}
