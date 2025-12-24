@@ -18,7 +18,6 @@ const cancelCategory = document.querySelector('.cancel');
 const doneCategory = document.querySelector('.done');
 const btnCategory = document.querySelector('.create_category');
 
-
 btnCategory.addEventListener('click', () => {
     sections.style.display = 'block';
     document.body.style.background = ' rgba(50, 44, 44, 0.17)'
@@ -26,24 +25,26 @@ btnCategory.addEventListener('click', () => {
 
 cancelCategory.addEventListener('click', () => {
     sections.style.display = 'none';
-     document.body.style.background = 'none'
-     inputCategory.value = '';
+    document.body.style.background = 'none'
+    inputCategory.value = '';
 });
 
 // CREATE NEW CATEGORY
 const smallCategory = document.getElementById('small-category');
 doneCategory.addEventListener('click', (e) => {
     e.preventDefault();
+    const text = document.createElement('div');
     const newCategoryName = inputCategory.value.trim();
     if (newCategoryName === '') {
         alert('Please enter a category name.');
     }
-    const text = document.createElement('div'); 
-    text.textContent = newCategoryName;
-    smallCategory.appendChild(text); 
+    else {
+        text.textContent = newCategoryName;
+    }
+    smallCategory.appendChild(text);
     inputCategory.value = '';
     document.body.style.background = 'none'
     sections.style.display = 'none'
-    
+
 });
 
