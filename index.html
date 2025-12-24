@@ -7,6 +7,7 @@
     <title>Task management</title>
     <link rel="stylesheet" href="/css/style.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="icon" type="img/png" href="img/logo.png">
 </head>
 
 <body>
@@ -31,9 +32,12 @@
                     <i id="active" class='bx bx-task'></i>
                     <p id="active">All Tasks</p>
                 </li>
-                <li class="category icons">
-                    <i class='bx bx-category'></i>
-                    <p>Category</p>
+                <li class="group">
+                    <div class="category icons">
+                        <i class='bx bx-category'></i>
+                        <p>Category</p>
+                    </div>
+                    <div id="small-category"></div>
                 </li>
                 <li class="create_category icons">
                     <i class='bx bx-plus'></i>
@@ -61,6 +65,20 @@
                 <p>Logout</p>
             </div>
         </nav>
+        <section class="modal-overlay" id="category-modal" aria-hidden="true">
+            <div class="modal-card">
+                <div class="section-title">
+                    <h3>Create new category</h3>
+                </div>
+                <form id="category-form">
+                    <input id="category-name" type="text" placeholder'="Enter name" required maxlength="32">
+                    <div class="modal-actions">
+                        <button type="button" class="cancel" data-close-category>Cancel</button>
+                        <button type="submit" class="done">Done</button>
+                    </div>
+                </form>
+            </div>
+        </section>
         <div class="main-content-container">
             <div class="main-top"></div>
             <main class="mian-button"></main>
