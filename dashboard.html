@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="icon" href="imgs/logo.png" type="image/png">
+</head>
+
+<body>
+    <header class="header-container">
+        <div class="header-left" id="head_contain">
+            <button id="menu-button">☰ </button>
+            <h2>Task Management</h2>
+        </div>
+        <div class="header-right">
+            <i class='bx bxs-user-circle user'></i>
+            <p>Profile Name</p>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <nav class="nav-contain" id="nav">
+            <ul>
+                <li class="create_task icons">
+                    <i class='bx bx-plus'></i>
+                    <p> Create</p>
+                </li>
+                <li class="all_task icons">
+                    <i id="active" class='bx bx-task'></i>
+                    <p id="active">All Tasks</p>
+                </li>
+                <li class="group">
+                    <div class="category icons">
+                        <i class='bx bx-category'></i>
+                        <p>Category</p>
+                    </div>
+                    <div id="small-category"></div>
+                </li>
+                <li class="create_category icons">
+                    <i class='bx bx-plus'></i>
+                    <p>Create Category</p>
+                </li>
+                <li class="reminder icons">
+                    <i class='bx bx-bell'></i>
+                    <p> Remind</p>
+                </li>
+                <li class="rate icons">
+                    <i class='bx bx-star'></i>
+                    <p>Rate</p>
+                </li>
+                <li class="profile icons">
+                    <i class='bx bxs-user'></i>
+                    <p>Profile</p>
+                </li>
+                <li class="setting icons">
+                    <i class='bx bx-cog'></i>
+                    <p>Setting</p>
+                </li>
+            </ul>
+            <div class="logout icons">
+                <i class='bx bx-log-out'></i>
+                <p>Logout</p>
+            </div>
+        </nav>
+
+        <section class="modal-overlay" id="category-modal" aria-hidden="true">
+            <div class="modal-card">
+                <div class="section-title">
+                    <h3>Create new category</h3>
+                </div>
+                <form id="category-form">
+                    <input id="category-name" type="text" placeholder="Enter name" required maxlength="32">
+                    <div class="modal-actions">
+                        <button type="button" class="cancel" data-close-category>Cancel</button>
+                        <button type="submit" class="done">Done</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <div class="main-content-container">
+            <div class="main-top">
+                <div class="summary-card-container">
+                    <div class="summary-card" style="background-color: #afd56c;">
+                        <h4>All Task <span>0</span></h4>
+                    </div>
+
+                    <div class="summary-card" style="background-color:#34cdfa;">
+                        <h4>Done <span>0</span></h4>
+                    </div>
+
+                    <div class="summary-card" style="background-color:#07b1ef;">
+                        <h4>In Progress <span>0</span></h4>
+                    </div>
+
+                    <div class="summary-card" style="background-color: rgba(12, 108, 108, 0.645);">
+                        <h4>Todo <span>0</span></h4>
+                    </div>
+                </div>
+
+                <div class="search-box">
+                    <div class="input-wrapper">
+                        <input type="text" placeholder="Search task name here...">
+                        <button class="Submit">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <div class="filter-group">
+                        <select id="task" class="custom-select">
+                            <option value="" disabled selected>Filter by Status</option>
+                            <option value="todo">To Do</option>
+                            <option value="in-progress">In-progress</option>
+                            <option value="done">Done</option>
+                        </select>
+                        <select id="task" class="custom-select">
+                            <option value="" disabled selected>Filter by Priority</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                        <select id="task" class="custom-select">
+                            <option value="" disabled selected>Filter by Category</option>
+                            <option value="">-</option>
+                            <option value="">-</option>
+                            <option value="">-</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+            <main class="mian-button"> <b>Task Table</b>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="boder_th">NO</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Category</th>
+                                <th>Due Date</th>
+                                <th>Action</th>
+                                <th class="boder-remark">Remark</th>
+                            </tr>
+                        </thead>
+    
+                        <tbody>
+                            <tr>
+                                <td >1</td>
+                                <td>Sample Task</td>
+                                <td>
+                                    <select class="status-select">
+                                        <option value="" selected disabled>select here...</option>
+                                        <option value="todo">Todo</option>
+                                        <option value="in-progress">In Progress</option>
+                                        <option value="done">Done</option>
+                                    </select>
+    
+                                </td>
+                                <td>
+                                    <select class="select">
+                                        <option value="" selected disabled>select here...</option>
+                                        <option value="todo">High</option>
+                                        <option value="in-progress">Medium</option>
+                                        <option value="done">Low</option>
+                                    </select>
+                                </td>
+                                <td>Work</td>
+                                <td>2025-01-01</td>
+                                <td>
+                                    <button class="edit-btn">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </button>
+    
+                                    <button class="delete-btn">
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                </td>
+    
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td class="boder-td">1</td>
+                                <td>Sample Task</td>
+                                <td>
+                                    <select class="status-select">
+                                        <option value="" selected disabled>select here...</option>
+                                        <option value="todo">Todo</option>
+                                        <option value="in-progress">In Progress</option>
+                                        <option value="done">Done</option>
+                                    </select>
+    
+                                </td>
+                                <td>
+                                    <select class="select">
+                                        <option value="" selected disabled>select here...</option>
+                                        <option value="todo">High</option>
+                                        <option value="in-progress">Medium</option>
+                                        <option value="done">Low</option>
+                                    </select>
+                                </td>
+                                <td>Work</td>
+                                <td>2025-01-01</td>
+                                <td>
+                                    <button class="edit-btn">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </button>
+    
+                                    <button class="delete-btn">
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                </td>
+    
+                                <td class="boder-right">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+            </main>
+        </div>
+    </div>
+</body>
+<script src="/js/dashboard.js"></script>
+
+</html>
