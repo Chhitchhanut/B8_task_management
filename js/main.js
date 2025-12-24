@@ -26,6 +26,8 @@ btnCategory.addEventListener('click', () => {
 
 cancelCategory.addEventListener('click', () => {
     sections.style.display = 'none';
+     document.body.style.background = 'none'
+     inputCategory.value = '';
 });
 
 // CREATE NEW CATEGORY
@@ -40,5 +42,8 @@ doneCategory.addEventListener('click', (e) => {
     text.textContent = newCategoryName;
     smallCategory.appendChild(text); 
     inputCategory.value = '';
+    document.body.style.background = 'none'
+    sections.style.display = 'none'
+    
 });
 
