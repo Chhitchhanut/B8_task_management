@@ -17,16 +17,20 @@ const modelAction = document.querySelectorAll('.modal-actions button')
 const cancelCategory = document.querySelector('.cancel');
 const doneCategory = document.querySelector('.done');
 const btnCategory = document.querySelector('.create_category');
+const mainContentContainer = document.querySelector('.main-content-container');
 
 btnCategory.addEventListener('click', () => {
     sections.style.display = 'block';
+    mainContentContainer.style.display = 'none';
     document.body.style.background = ' rgba(50, 44, 44, 0.17)'
 });
 
 cancelCategory.addEventListener('click', () => {
     sections.style.display = 'none';
     document.body.style.background = 'none'
+    mainContentContainer.style.display = 'block';
     inputCategory.value = '';
+
 });
 
 // CREATE NEW CATEGORY
@@ -45,6 +49,7 @@ doneCategory.addEventListener('click', (e) => {
     inputCategory.value = '';
     document.body.style.background = 'none'
     sections.style.display = 'none'
+    mainContentContainer.style.display = 'block';
 
 });
 
