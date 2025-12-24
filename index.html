@@ -4,8 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task management</title>
+    <title>Task Management</title>
     <link rel="stylesheet" href="/css/style.css">
+    <!-- Font Awesome for search icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </head>
 
 <body>
@@ -17,13 +20,64 @@
             <h2>Task Management</h2>
         </div>
     </header>
+
     <div class="main-container">
         <nav class="nav-contain">Navigation</nav>
+
+        <!-- <div class="main-content-container"> -->
         <div class="main-content-container">
-            <div class="main-top">Main-top</div>
-            <main class="mian-button">Main-button</main>
+            <div class="main-top">
+                <div class="summary-card-container">
+                    <div class="summary-card" style="background-color: #afd56c;">
+                        <h4>All Task <span>0</span></h4>
+                    </div>
+
+                    <div class="summary-card" style="background-color:#34cdfa;">
+                        <h4>Done <span>0</span></h4>
+                    </div>
+
+                    <div class="summary-card" style="background-color:#07b1ef;">
+                        <h4>In Progress <span>0</span></h4>
+                    </div>
+
+                    <div class="summary-card" style="background-color: rgba(12, 108, 108, 0.645);">
+                        <h4>Todo <span>0</span></h4>
+                    </div>
+                </div>
+
+                <div class="search-box">
+                    <div class="input-wrapper">
+                        <input type="text" placeholder="Search task name here...">
+                        <button class="Submit">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <div class="filter-group">
+                        <select id="task" class="custom-select">
+                            <option value="" disabled selected>Filter by Status</option>
+                            <option value="todo">To Do</option>
+                            <option value="in-progress">In-progress</option>
+                            <option value="done">Done</option>
+                        </select>
+                        <select id="task" class="custom-select">
+                            <option value="" disabled selected>Filter by Priority</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                        <select id="task" class="custom-select">
+                            <option value="" disabled selected>Filter by Category</option>
+                            <option value="">-</option>
+                            <option value="">-</option>
+                            <option value="">-</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    <main class="main-button">Main-button</main>
 </body>
 
 </html>
