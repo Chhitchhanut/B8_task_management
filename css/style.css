@@ -3,52 +3,132 @@ body {
     padding: 0;
     height: 100vh;
     width: 100%;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 /* NAVIGATION */
 .header-container {
+    padding: 0px 12px;
     display: flex;
-    background: rgba(127, 255, 212, 0.249);
-} 
+    justify-content: space-between;
+    background: rgba(90, 178, 241, 0.193);
+}
 
-/* Menu BUTTON  */
+/* HEADER-LEFT */
 
 .header-left {
-    flex: 1;
-    background: thistle;
     text-align: center;
-} 
+    display: flex;
+    gap: 8px;
+}
+#menu-button{
+    margin: 16px;
+    padding: 0px 20px;
+    border: none;
+    background: rgba(0, 0, 255, 0.755);
+    color: white;
+    border-radius: 6px;
+    font-size: 16px;
+    
+}
+#menu-button:hover{
+    background: rgba(0, 0, 255, 0.522);
+}
 
+/* HEADER-RIGHT */
+.header-right{
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
 
-
-.header-right {
-    flex: 6;
-} 
-
+.header-right img {
+    width: 16%;
+    padding-right: 8px;
+}
 
 
 .main-container {
     display: flex;
-    justify-content: space-around;
-    height: 100vh;
-    text-align: center;
-} 
+    height: 90vh;
+}
 
  
 .nav-contain {
-    background: rgba(0, 0, 255, 0.327);
     flex: 1;
-    border-radius: 14px;
-    margin: 8px 0px 8px 8px;
-} 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0px 24px;
+    border-right: 1px rgba(90, 178, 241, 0.425) solid;
+}
 
+ul{
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+.icons{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+ #active {
+    color: blue;
+}
 
+.icons i{
+     font-size: 22px;
+}
 
+.create_task{
+    padding-left: 10px;
+    border: 1px solid rgba(128, 128, 128, 0.359);
+    border-radius: 16px;
+    margin-top: 18px;
+}
+.create_task:hover{
+    background: rgba(173, 216, 230, 0.199);
+}
+.create_category{
+    padding: 0px 8px;
+    border: 1px solid rgba(128, 128, 128, 0.359);
+    border-radius: 16px;
+    margin: 8px;
+}
+.create_category:hover{
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
+}
+.category, .reminder, .rate, .all_task, .setting, .profile {
+    border-radius: 6px;
+    padding:0px 8px;
+}
+
+li:hover{
+    color: blue;
+}
+.logout{
+    background: rgba(255, 0, 0, 0.086);
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+
+}
+.logout:hover{
+    background: none;
+    border: 1px solid rgba(255, 0, 0, 0.421);
+    color: red;
+}
+/* MAIN */
 .main-content-container {
     flex: 6;
     display: flex;
     flex-direction: column;
-    
+
 }
 
 .main-top {
@@ -156,5 +236,112 @@ body {
     border-color: #4A90E2;
     color: #4A90E2;
 }
-.blue { background-color: #E1F5FE; color: #03A9F4; }
-.green { background-color: #E8F5E9; color: #4CAF50; }
+
+
+/* MAIN-BUTTON */
+.mian-button {
+    font-size: 30px;
+    padding: 0px 30px;
+    flex: 2;
+    border-radius: 14px;
+}
+/* Table */
+table {
+    width: 100%;
+    padding: 20px 0px;
+}
+th,
+td {
+    padding: 10px;
+    text-align: center;
+    background-color: #c1d0de3b;
+    font-size: 14px;
+   
+}
+
+th {
+    background-color: #69a9e9;
+    font-weight: 600;  
+}
+
+tr:hover {
+    background-color: #f1f5f9;
+}
+.boder_th{
+     border-radius:10px 0px 0px 0px;
+}
+.boder-remark{
+     border-radius:0px 10px 0px 0px;
+}
+
+.boder-td{
+    border-radius: 0px 0px 0px 10px;
+   
+    
+}
+.boder-right{
+     border-radius:0px 0px 10px 0px;
+    
+}
+
+/* Select */
+
+.status-select {
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.status-select:has(option[value="todo"]:checked) {
+    background: #e1c1d4c6;
+}
+
+.status-select:has(option[value="in-progress"]:checked) {
+    background: #69a9e9;
+}
+
+.status-select:has(option[value="done"]:checked) {
+    background: #6bd895;
+}
+.select{
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* Buttons */
+button {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.edit-btn {
+    background-color: #3b82f6;
+    color: #fff;
+}
+
+.edit-btn:hover {
+    background-color: #2563eb;
+}
+
+.delete-btn {
+    background-color: #ef4444;
+    color: #fff;
+    margin-left: 6px;
+}
+
+.delete-btn:hover {
+    background-color: #dc2626;
+}
