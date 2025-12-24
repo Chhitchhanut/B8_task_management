@@ -11,23 +11,24 @@
 
 <body>
     <header class="header-container">
-        <div class="header-left">
-            <button id="menu-button">☰ Menu</button>
+        <div class="header-left" id="head_contain">
+            <button id="menu-button">☰ </button>
             <h2>Task Management</h2>
         </div>
         <div class="header-right">
-            <img src="/imgs/profile.png" alt="">
+            <i class='bx bxs-user-circle user'></i>
+            <p>Profile Name</p>
         </div>
     </header>
     <div class="main-container">
-        <nav class="nav-contain">
+        <nav class="nav-contain" id="nav">
             <ul>
                 <li class="create_task icons">
                     <i class='bx bx-plus'></i>
                     <p> Create</p>
                 </li>
                 <li class="all_task icons">
-                    <i id="active" class='bx bx-task' ></i>
+                    <i id="active" class='bx bx-task'></i>
                     <p id="active">All Tasks</p>
                 </li>
                 <li class="category icons">
@@ -66,5 +67,6 @@
         </div>
     </div>
 </body>
+<script src="/js/main.js"></script>
 
 </html>
