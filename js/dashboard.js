@@ -88,7 +88,6 @@ function updateTaskCounts() {
     let inProgress = 0;
     let todo = 0;
 
-    // Count based on selected value
     statusSelects.forEach(select => {
         const value = select.value;
         if (value === 'done') done++;
@@ -96,14 +95,12 @@ function updateTaskCounts() {
         else if (value === 'todo') todo++;
     });
 
-    // Update cards
     allCard.textContent = all;
     doneCard.textContent = done;
     inProgressCard.textContent = inProgress;
     todoCard.textContent = todo;
 }
 
-// Update counts whenever a status changes
 const tableBody = document.querySelector('table tbody');
 function tables(e) {
     if (e.target.classList.contains('status-select')) {
@@ -113,75 +110,55 @@ function tables(e) {
 tableBody.addEventListener('change', tables);
 updateTaskCounts();
 
-// FILLER
+// SEARCH FILLER
+
 const statusFilter = document.getElementById('statusFilter');
 const priorityFilter = document.getElementById('priorityFilter');
 const categoryFilter = document.getElementById('categoryFilter');
-const tableRows = document.querySelectorAll('tbody tr');
 const searchInput = document.getElementById('categorySearch');
 const searchBtn = document.getElementById('searchBtn');
+const tableRows = document.querySelectorAll('tbody tr');
 
 function filterTasks() {
     const selectedStatus = statusFilter.value;
     const selectedPriority = priorityFilter.value;
-    const selectedCategory = categoryFilter.value; // fixed typo
+    const selectedCategory = categoryFilter.value.toLowerCase();
+    const searchQuery = searchInput.value.toLowerCase();
 
     for (let row of tableRows) {
         const taskStatus = row.querySelector('.status-select').value;
         const taskPriority = row.querySelector('.priority-select').value;
         const taskCategory = row.querySelector('.category-cell').textContent.toLowerCase();
+        const taskName = row.cells[1].textContent.toLowerCase();
 
         let showRow = true;
 
         if (selectedStatus && taskStatus !== selectedStatus) {
             showRow = false;
         }
+
         if (selectedPriority && taskPriority !== selectedPriority) {
             showRow = false;
         }
-        if (selectedCategory && taskCategory !== selectedCategory.toLowerCase()) {
+
+        if (selectedCategory && taskCategory !== selectedCategory) {
             showRow = false;
         }
 
+        if (searchQuery && !taskName.includes(searchQuery) && !taskCategory.includes(searchQuery)) {
+            showRow = false;
+        }
         if (showRow) {
             row.style.display = '';
         } else {
-            row.style.display = 'none';    
+            row.style.display = 'none';
         }
     }
 }
-searchInput.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') filterTasks();
-});
-
+// Event listeners
 statusFilter.addEventListener('change', filterTasks);
 priorityFilter.addEventListener('change', filterTasks);
 categoryFilter.addEventListener('change', filterTasks);
-
-// SEARCH
-function filterTasks() {
-    const searchTerm = searchInput.value.toLowerCase();
-    tableRows.forEach(row => {
-        const taskName = row.cells[1].textContent.toLowerCase(); // second column = Name
-        if (taskName.includes(searchTerm)) {
-            row.style.display = ''; // show row
-        } else {
-            row.style.display = 'none'; // hide row
-        }
-    });
-}
-// Trigger search on button click
 searchBtn.addEventListener('click', filterTasks);
-// Optional: filter while typing
 searchInput.addEventListener('input', filterTasks);
-
-
-
-
-
-
-
-
-
-
 

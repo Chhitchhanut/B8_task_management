@@ -85,129 +85,128 @@
         </section>
 
         <div class="main-content-container">
-    <div class="main-top">
-        <div class="summary-card-container">
-            <div class="summary-card all" style="background-color: #afd56c;">
-                <h4>All Task <span>0</span></h4>
-            </div>
-            <div class="summary-card done" style="background-color:#34cdfa;">
-                <h4>Done <span>0</span></h4>
-            </div>
-            <div class="summary-card progress" style="background-color:#07b1ef;">
-                <h4>In Progress <span>0</span></h4>
-            </div>
-            <div class="summary-card todo" style="background-color: rgba(12, 108, 108, 0.645);">
-                <h4>Todo <span>0</span></h4>
-            </div>
-        </div>
-
-        <div class="search-box">
-            <div class="input-wrapper">
-                <input type="text" id="categorySearch" placeholder="Search task name here...">
-                <button class="Submit" id="searchBtn">
-                    <i class="fa fa-search"></i>
-                </button>
-            </div>
-            <div class="filter-group">
-                <select id="statusFilter" class="custom-select">
-                    <option value="">Filter by Status</option>
-                    <option value="todo">To Do</option>
-                    <option value="in-progress">In-progress</option>
-                    <option value="done">Done</option>
-                </select>
-
-                <select id="priorityFilter" class="custom-select">
-                    <option value="">Filter by Priority</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                </select>
-
-                <select id="categoryFilter" class="custom-select">
-                    <option value="">Filter by Category</option>
-                    <option value="work">Work</option>
-                    <option value="personal">Personal</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <main class="mian-button"> <b>Task Table</b>
-        <table>
-            <thead>
-                <tr>
-                    <th class="boder_th">NO</th>
-                    <th>Name</th>
-                    <th>Status</th>
-                    <th>Priority</th>
-                    <th>Category</th>
-                    <th>Due Date</th>
-                    <th>Action</th>
-                    <th class="boder-remark">Remark</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Sample Task 1</td>
-                    <td>
-                        <select class="status-select">
-                            <option value="" selected disabled>select here...</option>
-                            <option value="todo">Todo</option>
-                            <option value="in-progress">In Progress</option>
+            <div class="main-top">
+                <div class="summary-card-container">
+                    <div class="summary-card all " style="background-color: #afd56c;">
+                        <h4>All Task <span>0</span></h4>
+                    </div>
+                    <div class="summary-card done" style="background-color:#34cdfa;">
+                        <h4>Done <span>0</span></h4>
+                    </div>
+                    <div class="summary-card progress" style="background-color:#07b1ef;">
+                        <h4>In Progress <span>0</span></h4>
+                    </div>
+                    <div class="summary-card todo" style="background-color: rgba(12, 108, 108, 0.645);">
+                        <h4>Todo <span>0</span></h4>
+                    </div>
+                </div>
+                <div class="search-box">
+                    <div class="input-wrapper">
+                        <input type="text" id="categorySearch" placeholder="Search task name here...">
+                        <button class="Submit" id="searchBtn">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="filter-group">
+                        <select id="statusFilter" class="custom-select">
+                            <option value="">Filter by Status</option>
+                            <option value="todo">To Do</option>
+                            <option value="in-progress">In-progress</option>
                             <option value="done">Done</option>
                         </select>
-                    </td>
-                    <td>
-                        <select class="priority-select">
-                            <option value="" selected disabled>select here...</option>
+
+                        <select id="priorityFilter" class="custom-select">
+                            <option value="">Filter by Priority</option>
                             <option value="high">High</option>
                             <option value="medium">Medium</option>
                             <option value="low">Low</option>
                         </select>
-                    </td>
-                    <td class="category-cell">Work</td>
-                    <td>2025-01-01</td>
-                    <td>
-                        <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                        <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
-                    </td>
-                    <td>—</td>
-                </tr>
 
-                <tr>
-                    <td>2</td>
-                    <td>Sample Task 2</td>
-                    <td>
-                        <select class="status-select">
-                            <option value="" selected disabled>select here...</option>
-                            <option value="todo">Todo</option>
-                            <option value="in-progress">In Progress</option>
-                            <option value="done">Done</option>
+                        <select id="categoryFilter" class="custom-select">
+                            <option value="">Filter by Category</option>
+                            <option value="work">Work</option>
+                            <option value="personal">Personal</option>
+                            <option value="other">Other</option>
                         </select>
-                    </td>
-                    <td>
-                        <select class="priority-select">
-                            <option value="" selected disabled>select here...</option>
-                            <option value="high">High</option>
-                            <option value="medium">Medium</option>
-                            <option value="low">Low</option>
-                        </select>
-                    </td>
-                    <td class="category-cell">Personal</td>
-                    <td>2025-01-02</td>
-                    <td>
-                        <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                        <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
-                    </td>
-                    <td>—</td>
-                </tr>
-            </tbody>
-        </table>
-    </main>
-</div>
+                    </div>
+                </div>
+            </div>
+            <main class="mian-button"> <b>Task Table</b>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="boder_th">NO</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Category</th>
+                            <th>Due Date</th>
+                            <th>Action</th>
+                            <th class="boder-remark">Remark</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Sample Task 1</td>
+                            <td>
+                                <select class="status-select">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="todo">Todo</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="done">Done</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class="priority-select ">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </td>
+                            <td class="category-cell">Work</td>
+                            <td>2025-01-01</td>
+                            <td>
+                                <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
+                            </td>
+                            <td>—</td>
+                        </tr>
+                        
+
+                        <tr>
+                            <td>2</td>
+                            <td>Sample Task 2</td>
+                            <td>
+                                <select class="status-select">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="todo">Todo</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="done">Done</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class="priority-select ">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </td>
+                            <td class="category-cell">Personal</td>
+                            <td>2025-01-02</td>
+                            <td>
+                                <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
+                            </td>
+                            <td>—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </main>
+        </div>
     </div>
 </body>
 <script src="/js/dashboard.js"></script>
