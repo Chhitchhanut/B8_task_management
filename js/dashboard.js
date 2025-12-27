@@ -16,7 +16,7 @@ function hideShowBtn() {
         downIcon.style.display = 'none';
         allCategory.style.display = 'none';
     } else {
-       downIcon.style.display = 'block';
+        downIcon.style.display = 'block';
     }
 }
 menuButton.addEventListener("click", hideShowBtn);
@@ -103,7 +103,6 @@ function updateTaskCounts() {
     todoCard.textContent = todo;
 }
 
-
 // Update counts whenever a status changes
 const tableBody = document.querySelector('table tbody');
 function tables(e) {
@@ -113,3 +112,76 @@ function tables(e) {
 }
 tableBody.addEventListener('change', tables);
 updateTaskCounts();
+
+// FILLER
+const statusFilter = document.getElementById('statusFilter');
+const priorityFilter = document.getElementById('priorityFilter');
+const categoryFilter = document.getElementById('categoryFilter');
+const tableRows = document.querySelectorAll('tbody tr');
+const searchInput = document.getElementById('categorySearch');
+const searchBtn = document.getElementById('searchBtn');
+
+function filterTasks() {
+    const selectedStatus = statusFilter.value;
+    const selectedPriority = priorityFilter.value;
+    const selectedCategory = categoryFilter.value; // fixed typo
+
+    for (let row of tableRows) {
+        const taskStatus = row.querySelector('.status-select').value;
+        const taskPriority = row.querySelector('.priority-select').value;
+        const taskCategory = row.querySelector('.category-cell').textContent.toLowerCase();
+
+        let showRow = true;
+
+        if (selectedStatus && taskStatus !== selectedStatus) {
+            showRow = false;
+        }
+        if (selectedPriority && taskPriority !== selectedPriority) {
+            showRow = false;
+        }
+        if (selectedCategory && taskCategory !== selectedCategory.toLowerCase()) {
+            showRow = false;
+        }
+
+        if (showRow) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';    
+        }
+    }
+}
+searchInput.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') filterTasks();
+});
+
+statusFilter.addEventListener('change', filterTasks);
+priorityFilter.addEventListener('change', filterTasks);
+categoryFilter.addEventListener('change', filterTasks);
+
+// SEARCH
+function filterTasks() {
+    const searchTerm = searchInput.value.toLowerCase();
+    tableRows.forEach(row => {
+        const taskName = row.cells[1].textContent.toLowerCase(); // second column = Name
+        if (taskName.includes(searchTerm)) {
+            row.style.display = ''; // show row
+        } else {
+            row.style.display = 'none'; // hide row
+        }
+    });
+}
+// Trigger search on button click
+searchBtn.addEventListener('click', filterTasks);
+// Optional: filter while typing
+searchInput.addEventListener('input', filterTasks);
+
+
+
+
+
+
+
+
+
+
+
