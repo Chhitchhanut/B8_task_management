@@ -1,55 +1,115 @@
-
 // MENU BUTTON
 const menuButton = document.getElementById("menu-button");
 const nav = document.getElementById("nav");
 const headContent = document.getElementById("head_contain");
+const downIcon = document.getElementById('icon_down');
+const allCategory = document.getElementById('small-category');
 function hideShowBtn() {
+    downIcon.style.display = 'none';
     nav.classList.toggle('compact');
+    allCategory.style.display = 'none';
     headContent.classList.toggle('hidden');
+    if (headContent) {
+        allCategory.style.display = 'block';
+    }
+    if (nav.classList.contains('compact')) {
+        downIcon.style.display = 'none';
+        allCategory.style.display = 'none';
+    } else {
+       downIcon.style.display = 'block';
+    }
 }
-menuButton.addEventListener("click", hideShowBtn)
+menuButton.addEventListener("click", hideShowBtn);
 
 // CREATE CATEGORY
-
 const sections = document.getElementById('category-modal');
 const inputCategory = document.getElementById('category-name');
-const modelAction = document.querySelectorAll('.modal-actions button')
 const cancelCategory = document.querySelector('.cancel');
 const doneCategory = document.querySelector('.done');
 const btnCategory = document.querySelector('.create_category');
 const mainContentContainer = document.querySelector('.main-content-container');
-
 btnCategory.addEventListener('click', () => {
     sections.style.display = 'block';
     mainContentContainer.style.display = 'none';
-    document.body.style.background = ' rgba(50, 44, 44, 0.17)'
+    document.body.style.background = 'rgba(50, 44, 44, 0.17)';
+    allCategory.style.display = 'block';
+    // downIcon.style.display = 'block';
 });
 
 cancelCategory.addEventListener('click', () => {
     sections.style.display = 'none';
-    document.body.style.background = 'none'
+    document.body.style.background = 'none';
     mainContentContainer.style.display = 'block';
     inputCategory.value = '';
-
 });
 
 // CREATE NEW CATEGORY
-const smallCategory = document.getElementById('small-category');
 doneCategory.addEventListener('click', (e) => {
     e.preventDefault();
-    const text = document.createElement('div');
     const newCategoryName = inputCategory.value.trim();
     if (newCategoryName === '') {
         alert('Please enter a category name.');
+        return;
     }
-    else {
-        text.textContent = newCategoryName;
-    }
-    smallCategory.appendChild(text);
+    const text = document.createElement('div');
+    text.textContent = newCategoryName;
+    allCategory.appendChild(text);
     inputCategory.value = '';
-    document.body.style.background = 'none'
-    sections.style.display = 'none'
+    sections.style.display = 'none';
+    document.body.style.background = 'none';
     mainContentContainer.style.display = 'block';
-
 });
 
+// DOWN CATEGORY TOGGLE
+
+downIcon.addEventListener('click', () => {
+    if (allCategory.style.display === 'none' || allCategory.style.display === '') {
+        allCategory.style.display = 'block';
+        downIcon.classList.remove('bx-chevron-down');
+        downIcon.classList.add('bx-chevron-up');
+    } else {
+        allCategory.style.display = 'none';
+        downIcon.classList.remove('bx-chevron-up');
+        downIcon.classList.add('bx-chevron-down');
+    }
+});
+
+// DATA
+function updateTaskCounts() {
+    // Cards
+    const allCard = document.querySelector('.summary-card.all span');
+    const doneCard = document.querySelector('.summary-card.done span');
+    const inProgressCard = document.querySelector('.summary-card.progress span');
+    const todoCard = document.querySelector('.summary-card.todo span');
+    const statusSelects = document.querySelectorAll('.status-select');
+
+    let all = statusSelects.length;
+    let done = 0;
+    let inProgress = 0;
+    let todo = 0;
+
+    // Count based on selected value
+    statusSelects.forEach(select => {
+        const value = select.value;
+        if (value === 'done') done++;
+        else if (value === 'in-progress') inProgress++;
+        else if (value === 'todo') todo++;
+    });
+
+    // Update cards
+    allCard.textContent = all;
+    doneCard.textContent = done;
+    inProgressCard.textContent = inProgress;
+    todoCard.textContent = todo;
+}
+
+
+// Update counts whenever a status changes
+const tableBody = document.querySelector('table tbody');
+function tables(e) {
+    if (e.target.classList.contains('status-select')) {
+        updateTaskCounts();
+    }
+}
+tableBody.addEventListener('change', tables);
+updateTaskCounts();

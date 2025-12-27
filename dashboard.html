@@ -38,6 +38,7 @@
                     <div class="category icons">
                         <i class='bx bx-category'></i>
                         <p>Category</p>
+                        <i class='bx bx-chevron-down ' id="icon_down"></i>
                     </div>
                     <div id="small-category"></div>
                 </li>
@@ -86,19 +87,19 @@
         <div class="main-content-container">
             <div class="main-top">
                 <div class="summary-card-container">
-                    <div class="summary-card" style="background-color: #afd56c;">
+                    <div class="summary-card all" style="background-color: #afd56c;">
                         <h4>All Task <span>0</span></h4>
                     </div>
 
-                    <div class="summary-card" style="background-color:#34cdfa;">
+                    <div class="summary-card done" style="background-color:#34cdfa;">
                         <h4>Done <span>0</span></h4>
                     </div>
 
-                    <div class="summary-card" style="background-color:#07b1ef;">
+                    <div class="summary-card progress" style="background-color:#07b1ef;">
                         <h4>In Progress <span>0</span></h4>
                     </div>
 
-                    <div class="summary-card" style="background-color: rgba(12, 108, 108, 0.645);">
+                    <div class="summary-card todo" style="background-color: rgba(12, 108, 108, 0.645);">
                         <h4>Todo <span>0</span></h4>
                     </div>
                 </div>
@@ -136,91 +137,91 @@
 
 
             <main class="mian-button"> <b>Task Table</b>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th class="boder_th">NO</th>
-                                <th>Name</th>
-                                <th>Status</th>
-                                <th>Priority</th>
-                                <th>Category</th>
-                                <th>Due Date</th>
-                                <th>Action</th>
-                                <th class="boder-remark">Remark</th>
-                            </tr>
-                        </thead>
-    
-                        <tbody>
-                            <tr>
-                                <td >1</td>
-                                <td>Sample Task</td>
-                                <td>
-                                    <select class="status-select">
-                                        <option value="" selected disabled>select here...</option>
-                                        <option value="todo">Todo</option>
-                                        <option value="in-progress">In Progress</option>
-                                        <option value="done">Done</option>
-                                    </select>
-    
-                                </td>
-                                <td>
-                                    <select class="select">
-                                        <option value="" selected disabled>select here...</option>
-                                        <option value="todo">High</option>
-                                        <option value="in-progress">Medium</option>
-                                        <option value="done">Low</option>
-                                    </select>
-                                </td>
-                                <td>Work</td>
-                                <td>2025-01-01</td>
-                                <td>
-                                    <button class="edit-btn">
-                                        <i class="fa-solid fa-pen-to-square"></i> Edit
-                                    </button>
-    
-                                    <button class="delete-btn">
-                                        <i class="fa-solid fa-trash"></i> Delete
-                                    </button>
-                                </td>
-    
-                                <td>—</td>
-                            </tr>
-                            <tr>
-                                <td class="boder-td">1</td>
-                                <td>Sample Task</td>
-                                <td>
-                                    <select class="status-select">
-                                        <option value="" selected disabled>select here...</option>
-                                        <option value="todo">Todo</option>
-                                        <option value="in-progress">In Progress</option>
-                                        <option value="done">Done</option>
-                                    </select>
-    
-                                </td>
-                                <td>
-                                    <select class="select">
-                                        <option value="" selected disabled>select here...</option>
-                                        <option value="todo">High</option>
-                                        <option value="in-progress">Medium</option>
-                                        <option value="done">Low</option>
-                                    </select>
-                                </td>
-                                <td>Work</td>
-                                <td>2025-01-01</td>
-                                <td>
-                                    <button class="edit-btn">
-                                        <i class="fa-solid fa-pen-to-square"></i> Edit
-                                    </button>
-    
-                                    <button class="delete-btn">
-                                        <i class="fa-solid fa-trash"></i> Delete
-                                    </button>
-                                </td>
-    
-                                <td class="boder-right">—</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="boder_th">NO</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Category</th>
+                            <th>Due Date</th>
+                            <th>Action</th>
+                            <th class="boder-remark">Remark</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Sample Task</td>
+                            <td>
+                                <select class="status-select">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="todo">Todo</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="done">Done</option>
+                                </select>
+
+                            </td>
+                            <td>
+                                <select class="select">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="todo">High</option>
+                                    <option value="in-progress">Medium</option>
+                                    <option value="done">Low</option>
+                                </select>
+                            </td>
+                            <td>Work</td>
+                            <td>2025-01-01</td>
+                            <td>
+                                <button class="edit-btn">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+
+                                <button class="delete-btn">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                            </td>
+
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td class="boder-td">1</td>
+                            <td>Sample Task</td>
+                            <td>
+                                <select class="status-select">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="todo">Todo</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="done">Done</option>
+                                </select>
+
+                            </td>
+                            <td>
+                                <select class="select">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="todo">High</option>
+                                    <option value="in-progress">Medium</option>
+                                    <option value="done">Low</option>
+                                </select>
+                            </td>
+                            <td>Work</td>
+                            <td>2025-01-01</td>
+                            <td>
+                                <button class="edit-btn">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+
+                                <button class="delete-btn">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                            </td>
+
+                            <td class="boder-right">—</td>
+                        </tr>
+                    </tbody>
+                </table>
             </main>
         </div>
     </div>
