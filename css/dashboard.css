@@ -22,7 +22,6 @@ body {
     display: flex;
     gap: 8px;
 }
-
 #menu-button {
     margin: 16px;
     padding: 0px 20px;
@@ -57,7 +56,7 @@ body {
     height: 90vh;
 }
 
-
+ 
 .nav-contain {
     width: 220px;
     border-radius: 14px;
@@ -149,25 +148,21 @@ ul {
     border-radius: 6px;
     padding: 0px 8px;
 }
-
 li p:hover {
     color: blue;
 }
-
 #small-category {
     display: flex;
-    flex-direction: column;
-    text-align: center;
-    padding-right: 80px;
+    flex-direction: column; 
+   text-align: center;
+   padding-right: 80px;
     gap: 18px;
 }
-
-#small-category div:hover {
+#small-category div:hover{
     background: rgba(144, 238, 144, 0.245);
     border-radius: 12px;
 }
-
-#small-category div {
+#small-category div{
     padding: 6px 0px;
 }
 
@@ -196,9 +191,8 @@ li p:hover {
     margin: 14% 22%;
     width: 30%;
     display: none;
-
+    
 }
-
 .modal-card {
     background: white;
     border-radius: 32px;
@@ -228,7 +222,7 @@ li p:hover {
     padding: 10px 20px;
     border-radius: 20px;
     border: none;
-    font-weight: bold;
+    font-weight:bold;
     cursor: pointer;
     font-size: 15px;
     transition: transform 0.2s ease, background 0.2s ease;
@@ -267,7 +261,7 @@ li p:hover {
 
 .main-top {
     flex: 1;
-
+    
     border-radius: 14px;
     margin: 8px;
     margin-bottom: 0;
@@ -277,13 +271,13 @@ li p:hover {
 .summary-card-container {
     display: flex;
     justify-content: space-between;
-    gap: 20px;
+    gap: 20px; 
     width: 100%;
-
+   
 }
 
 .summary-card {
-    flex: 1;
+    flex: 1; 
     background: #4CAF50;
     height: 70px;
     padding: 20px;
@@ -293,7 +287,7 @@ li p:hover {
     justify-content: center;
     color: white;
     text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 
@@ -379,48 +373,43 @@ li p:hover {
     flex: 2;
     border-radius: 14px;
 }
-
 /* Table */
 table {
     width: 100%;
     padding: 20px 0px;
 }
-
 th,
 td {
     padding: 10px;
     text-align: center;
     background-color: #c1d0de3b;
     font-size: 14px;
-
+   
 }
 
 th {
     background-color: #69a9e9;
-    font-weight: 600;
+    font-weight: 600;  
 }
 
 tr:hover {
     background-color: #f1f5f9;
 }
-
-.boder_th {
-    border-radius: 10px 0px 0px 0px;
+.boder_th{
+     border-radius:10px 0px 0px 0px;
+}
+.boder-remark{
+     border-radius:0px 10px 0px 0px;
 }
 
-.boder-remark {
-    border-radius: 0px 10px 0px 0px;
-}
-
-.boder-td {
+.boder-td{
     border-radius: 0px 0px 0px 10px;
-
-
+   
+    
 }
-
-.boder-right {
-    border-radius: 0px 0px 10px 0px;
-
+.boder-right{
+     border-radius:0px 0px 10px 0px;
+    
 }
 
 /* Select */
@@ -445,8 +434,7 @@ tr:hover {
 .status-select:has(option[value="done"]:checked) {
     background: #6bd895;
 }
-
-.select {
+.select{
     border: none;
     font-size: 14px;
     cursor: pointer;
@@ -484,203 +472,4 @@ button {
 
 .delete-btn:hover {
     background-color: #dc2626;
-}
-
-
-
-
-
-/* --------------------create task form------------------- */
-.task-form {
-    display: none;
-    width: 100%;
-    max-width: 450px;
-    margin-top: 30px;
-    margin-left: 30%;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-}
-
-.create_task_header {
-    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-    padding: 20px;
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.create_task_title {
-    color: white;
-    font-size: 22px;
-    font-weight: 600;
-    margin: 0;
-}
-
-.create-task-btn-close {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.2s;
-}
-
-.create-task-btn-close:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.create-task-btn-close::before,
-.create-task-btn-close::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 16px;
-    height: 2px;
-    background: white;
-    transform: translate(-50%, -50%) rotate(45deg);
-}
-
-.create-task-btn-close::after {
-    transform: translate(-50%, -50%) rotate(-45deg);
-}
-
-.create_task_body {
-    display: flex;
-    flex-direction: column;
-    padding: 28px;
-}
-
-.form-group {
-    flex: 1;
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    font-size: 14px;
-    font-weight: 500;
-    color: #262626;
-    margin-bottom: 8px;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: 12px 16px;
-    font-size: 14px;
-    border: 1px solid #d9d9d9;
-    border-radius: 8px;
-    background: white;
-    transition: all 0.3s;
-    font-family: inherit;
-}
-
-.length input,
-.length select,
-.length textarea {
-    width: 92%;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #1890ff;
-    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
-}
-
-.form-row {
-    width: 100%;
-    display: flex;
-    gap: 16px;
-    margin-bottom: 20px;
-}
-
-.form-row .form-group {
-    flex: 1;
-    margin-bottom: 0;
-}
-
-select {
-    appearance: none;
-    padding-right: 40px;
-}
-
-textarea {
-    resize: vertical;
-    line-height: 1.5;
-}
-
-input[type="date"] {
-    color: #595959;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator:hover {
-    opacity: 1;
-}
-
-#create_task_btn {
-    width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-top: 8px;
-    letter-spacing: 0.3px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#create_task_btn:hover {
-    background: linear-gradient(135deg, #096dd9 0%, #1890ff 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-}
-
-#create_task_btn:active {
-    transform: translateY(0);
-}
-
-/* Placeholder styling */
-::placeholder {
-    color: #bfbfbf;
-}
-
-/* Responsive design */
-@media (max-width: 600px) {
-    .create_task_body {
-        padding: 24px;
-    }
-
-    .create_task_header {
-        padding: 20px;
-    }
-
-    .form-row {
-        flex-direction: column;
-        gap: 24px;
-    }
-
-    .task-form {
-        max-width: 100%;
-    }
 }
