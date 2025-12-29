@@ -68,7 +68,7 @@ btnCategory.addEventListener('click', () => {
     mainContentContainer.style.display = 'none';
     body.style.background = 'rgba(50, 44, 44, 0.17)';
     allCategory.style.display = 'none';
-    downIcon.style.display = 'none';
+    downIcon.style.display = 'block';
 });
 
 cancelCategory.addEventListener('click', () => {
