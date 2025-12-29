@@ -1,3 +1,4 @@
+
 // MENU BUTTON
 const menuButton = document.getElementById("menu-button");
 const nav = document.getElementById("nav");
@@ -32,8 +33,8 @@ btnCategory.addEventListener('click', () => {
     sections.style.display = 'block';
     mainContentContainer.style.display = 'none';
     document.body.style.background = 'rgba(50, 44, 44, 0.17)';
-    allCategory.style.display = 'block';
-    // downIcon.style.display = 'block';
+    allCategory.style.display = 'none';
+    downIcon.style.display = 'none';
 });
 
 cancelCategory.addEventListener('click', () => {
@@ -41,23 +42,6 @@ cancelCategory.addEventListener('click', () => {
     document.body.style.background = 'none';
     mainContentContainer.style.display = 'block';
     inputCategory.value = '';
-});
-
-// CREATE NEW CATEGORY
-doneCategory.addEventListener('click', (e) => {
-    e.preventDefault();
-    const newCategoryName = inputCategory.value.trim();
-    if (newCategoryName === '') {
-        alert('Please enter a category name.');
-        return;
-    }
-    const text = document.createElement('div');
-    text.textContent = newCategoryName;
-    allCategory.appendChild(text);
-    inputCategory.value = '';
-    sections.style.display = 'none';
-    document.body.style.background = 'none';
-    mainContentContainer.style.display = 'block';
 });
 
 // DOWN CATEGORY TOGGLE
@@ -161,4 +145,58 @@ priorityFilter.addEventListener('change', filterTasks);
 categoryFilter.addEventListener('change', filterTasks);
 searchBtn.addEventListener('click', filterTasks);
 searchInput.addEventListener('input', filterTasks);
+
+
+// STORE DATA
+doneCategory.addEventListener('click', async (e) => {
+    e.preventDefault(); 
+    const newCategoryName = inputCategory.value.trim();
+
+    if (newCategoryName==='') {
+        alert("Please enter a category name.");
+        return;
+    }
+    try {
+        await addDoc(collection(db, "categories"), {
+            category: newCategoryName,
+        });
+
+        const div = document.createElement("div");
+        div.textContent = newCategoryName;
+        smallCategoryDiv.appendChild(div);
+
+        inputCategory.value = "";
+        sections.style.display = "none";
+        document.body.style.background = "none";
+        mainContentContainer.style.display = "block";
+
+    } 
+    catch (error) {
+        console.error(error);
+        alert("Failed to add category!");
+    }
+});
+
+
+import { db } from './firebase-config.js';
+import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const categoryForm = document.getElementById("category-form");
+const categoryNameInput = document.getElementById("category-name");
+const smallCategoryDiv = document.getElementById("small-category");
+
+async function renderCategories() {
+    smallCategoryDiv.innerHTML = "";
+    try {
+        const querySnapshot = await getDocs(collection(db, "categories"));
+        for (const doc of querySnapshot.docs) { 
+            const div = document.createElement("div");
+            div.textContent = doc.data().category;
+            smallCategoryDiv.appendChild(div);
+        }
+    } catch (err) {
+        console.error("Error fetching categories:", err);
+    }
+}
+renderCategories();
 
