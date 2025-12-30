@@ -1,83 +1,177 @@
+// ----------------------------
+// IMPORTS
+// ----------------------------
+import { auth, db } from './firebase-config.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { collection, addDoc, serverTimestamp, getDocs, query, where, onSnapshot, doc, updateDoc, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+// ----------------------------
+// DOM ELEMENTS
+// ----------------------------
+const usernameTag = document.getElementById('userName');
 
-// MENU BUTTON
+// Menu
 const menuButton = document.getElementById("menu-button");
 const nav = document.getElementById("nav");
 const headContent = document.getElementById("head_contain");
-function hideShowBtn() {
-    nav.classList.toggle('compact');
-    headContent.classList.toggle('hidden');
-}
-menuButton.addEventListener("click", hideShowBtn)
-
-// CREATE CATEGORY
-
+// Category modal
 const sections = document.getElementById('category-modal');
 const inputCategory = document.getElementById('category-name');
-const modelAction = document.querySelectorAll('.modal-actions button')
+const btnCategory = document.querySelector('.create_category');
 const cancelCategory = document.querySelector('.cancel');
 const doneCategory = document.querySelector('.done');
-const btnCategory = document.querySelector('.create_category');
+const smallCategory = document.getElementById('small-category');
 const mainContentContainer = document.querySelector('.main-content-container');
 
-btnCategory.addEventListener('click', () => {
-    sections.style.display = 'block';
-    mainContentContainer.style.display = 'none';
-    document.body.style.background = ' rgba(50, 44, 44, 0.17)'
-});
+const categorySelect = document.getElementById('category');
 
-cancelCategory.addEventListener('click', () => {
-    sections.style.display = 'none';
-    document.body.style.background = 'none'
-    mainContentContainer.style.display = 'block';
-    inputCategory.value = '';
+// Task modal
+const showCreateTaskBtn = document.querySelector('.create_task');
+const createTaskBtnClose = document.querySelector('.create-task-btn-close');
+const mainTop = document.querySelector('.main-top');
+const mainBottom = document.querySelector('.mian-button');
+const taskForm = document.querySelector(".task-form");
 
-});
+// ----------------------------
+// AUTH / USER INFO
+// ----------------------------
+onAuthStateChanged(auth, async (user) => {
+    if (!user) return; // <-- Only return if user is NOT logged in
 
-// CREATE NEW CATEGORY
-const smallCategory = document.getElementById('small-category');
-doneCategory.addEventListener('click', (e) => {
-    e.preventDefault();
-    const text = document.createElement('div');
-    const newCategoryName = inputCategory.value.trim();
-    if (newCategoryName === '') {
-        alert('Please enter a category name.');
+    // Set username
+    usernameTag.textContent = user.displayName || user.email || "Guest";
+
+    // Reference to categories collection
+    const categoriesRef = collection(db, 'categories');
+
+    // Query: only get categories where email == current user
+    const q = query(categoriesRef, where('email', '==', user.email));
+
+    try {
+        const querySnapshot = await getDocs(q);
+
+        querySnapshot.forEach((doc) => {
+            const categoryData = doc.data();
+            const option = document.createElement('option');
+            option.value = categoryData.category;  // field name in Firestore
+            option.textContent = categoryData.category;
+            categorySelect.appendChild(option);
+        });
+
+        console.log('Categories loaded:', querySnapshot.size);
+    } catch (err) {
+        console.error('Error fetching categories:', err);
     }
-    else {
+});
+
+
+
+// ----------------------------
+// MENU BUTTON LOGIC
+// ----------------------------
+if (menuButton && nav && headContent) {
+    menuButton.addEventListener("click", () => {
+        nav.classList.toggle('compact');
+        headContent.classList.toggle('hidden');
+    });
+}
+
+// ----------------------------
+// CATEGORY MODAL LOGIC
+// ----------------------------
+if (btnCategory && sections && mainContentContainer) {
+    btnCategory.addEventListener('click', () => {
+        sections.style.display = 'block';
+        mainContentContainer.style.display = 'none';
+        document.body.style.background = 'rgba(50, 44, 44, 0.17)';
+    });
+}
+
+if (cancelCategory && sections && mainContentContainer && inputCategory) {
+    cancelCategory.addEventListener('click', () => {
+        sections.style.display = 'none';
+        mainContentContainer.style.display = 'block';
+        document.body.style.background = 'none';
+        inputCategory.value = '';
+    });
+}
+
+if (doneCategory && inputCategory && smallCategory && sections && mainContentContainer) {
+    doneCategory.addEventListener('click', (e) => {
+        e.preventDefault();
+        const newCategoryName = inputCategory.value.trim();
+        if (!newCategoryName) {
+            alert('Please enter a category name.');
+            return;
+        }
+        const text = document.createElement('div');
         text.textContent = newCategoryName;
-    }
-    smallCategory.appendChild(text);
-    inputCategory.value = '';
-    document.body.style.background = 'none'
-    sections.style.display = 'none'
-    mainContentContainer.style.display = 'block';
+        smallCategory.appendChild(text);
 
+        inputCategory.value = '';
+        sections.style.display = 'none';
+        mainContentContainer.style.display = 'block';
+        document.body.style.background = 'none';
+    });
+}
+
+
+// ----------------------------
+// TASK MODAL LOGIC
+// ----------------------------
+
+// Show task form
+showCreateTaskBtn.addEventListener('click', () => {
+    mainTop.style.display = 'none';
+    mainBottom.style.display = 'none';
+    taskForm.style.display = 'block';
+});
+
+// Close task form
+createTaskBtnClose.addEventListener('click', () => {
+    mainTop.style.display = 'block';
+    mainBottom.style.display = 'block';
+    taskForm.style.display = 'none';
+});
+
+// Submit task form
+taskForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = usernameTag.textContent;
+    const taskName = document.getElementById("taskName").value;
+    const priority = document.getElementById("priority").value;
+    const status = 'todo';
+    const category = document.getElementById("category").value;;
+    const dueDate = document.getElementById("dueDate").value;
+    const remark = document.getElementById("remark").value;
+
+    try {
+        await addDoc(collection(db, "tasks"), {
+            email,
+            taskName,
+            priority,
+            status,
+            category,
+            dueDate,
+            remark,
+            createdAt: serverTimestamp()
+        });
+
+        alert("✅ Task created successfully!");
+        taskForm.reset();
+        taskForm.style.display = 'none';
+        mainTop.style.display = 'block';
+        mainBottom.style.display = 'block';
+
+    } catch (error) {
+        console.error("❌ Error adding task: ", error);
+        alert("Failed to create task. Check console.");
+    }
 });
 
 // >>>>>>>>>>>>>>>>>>>>>>>> Task Table >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js';
-import {
-    getFirestore,
-    collection,
-    onSnapshot,
-    doc,
-    updateDoc,
-    deleteDoc,
-    query,
-    orderBy
-} from 'https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js';
 
-const firebaseConfig = {
-    apiKey: "AIzaSyANhgborXXro4Kgh3NrjHcIRYRwAzqqqfU",
-    authDomain: "task-management-b8.firebaseapp.com",
-    projectId: "task-management-b8",
-    storageBucket: "task-management-b8.firebasestorage.app",
-    messagingSenderId: "604867240136",
-    appId: "1:604867240136:web:7e58839da121daee1dc5fd"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 const tbody = document.querySelector('tbody');
 
 // ADD THIS LINE — THIS FIXES CANCEL!
