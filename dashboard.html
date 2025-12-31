@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Management</title>
     <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="stylesheet" href="/css/smooth-animations.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="icon" href="imgs/logo.png" type="image/png">
@@ -38,6 +40,7 @@
                     <div class="category icons">
                         <i class='bx bx-category'></i>
                         <p>Category</p>
+                        <i class='bx bx-chevron-down ' id="icon_down"></i>
                     </div>
                     <div id="small-category"></div>
                 </li>
@@ -74,10 +77,10 @@
                     <h3>Create new category</h3>
                 </div>
                 <form id="category-form">
-                    <input id="category-name" type="text" placeholder="Enter name" required maxlength="32">
+                    <input id="category-name" type="text" class="smooth-input" placeholder="Enter name" required maxlength="32">
                     <div class="modal-actions">
-                        <button type="button" class="cancel" data-close-category>Cancel</button>
-                        <button type="submit" class="done">Done</button>
+                        <button type="button" class="cancel enhanced-btn" data-close-category>Cancel</button>
+                        <button type="submit" class="done enhanced-btn">Done</button>
                     </div>
                 </form>
             </div>
@@ -86,56 +89,53 @@
         <div class="main-content-container">
             <div class="main-top">
                 <div class="summary-card-container">
-                    <div class="summary-card" style="background-color: #afd56c;">
+                    <div class="summary-card all card-entrance smooth-hover" style="background-color: #afd56c;">
                         <h4>All Task <span>0</span></h4>
                     </div>
-
-                    <div class="summary-card" style="background-color:#34cdfa;">
+                    <div class="summary-card done card-entrance smooth-hover" style="background-color:#34cdfa;">
                         <h4>Done <span>0</span></h4>
                     </div>
-
-                    <div class="summary-card" style="background-color:#07b1ef;">
+                    <div class="summary-card progress card-entrance smooth-hover" style="background-color:#07b1ef;">
                         <h4>In Progress <span>0</span></h4>
                     </div>
-
-                    <div class="summary-card" style="background-color: rgba(12, 108, 108, 0.645);">
+                    <div class="summary-card todo card-entrance smooth-hover" style="background-color: rgba(12, 108, 108, 0.645);">
                         <h4>Todo <span>0</span></h4>
                     </div>
                 </div>
-
                 <div class="search-box">
                     <div class="input-wrapper">
-                        <input type="text" placeholder="Search task name here...">
-                        <button class="Submit">
+                        <input type="text" id="categorySearch" placeholder="Search task name here...">
+                        <button class="Submit" id="searchBtn">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
-
                     <div class="filter-group">
-                        <select id="task" class="custom-select">
-                            <option value="" disabled selected>Filter by Status</option>
+                        <select id="statusFilter" class="custom-select">
+                            <option value="">Filter by Status</option>
                             <option value="todo">To Do</option>
                             <option value="in-progress">In-progress</option>
                             <option value="done">Done</option>
                         </select>
-                        <select id="task" class="custom-select">
-                            <option value="" disabled selected>Filter by Priority</option>
+
+                        <select id="priorityFilter" class="custom-select">
+                            <option value="">Filter by Priority</option>
                             <option value="high">High</option>
                             <option value="medium">Medium</option>
                             <option value="low">Low</option>
                         </select>
-                        <select id="task" class="custom-select">
-                            <option value="" disabled selected>Filter by Category</option>
-                            <option value="">-</option>
-                            <option value="">-</option>
-                            <option value="">-</option>
+
+                        <select id="categoryFilter" class="custom-select">
+                            <option value="">Filter by Category</option>
+                            <option value="company">Company</option>
+                            <option value="library">Library</option>
+                            <option value="school">School</option>
+                            <option value="work">Work</option>
                         </select>
                     </div>
                 </div>
             </div>
 
 <!-- >>>>>>>>>>>>>>>>>>>>>>>> Task Table >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
-
             <main class="mian-button"> <b>Task Table</b>
                 <table>
                     <thead>
@@ -163,13 +163,11 @@
                     <h2 class="create_task_title">Create New Task</h2>
                     <button type="button" class="create-task-btn-close"></button>
                 </div>
-
                 <div class="create_task_body">
                     <div class="form-group  length">
                         <label for="taskName">Task Name</label>
                         <input type="text" id="taskName" name="taskName" required>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label for="priority">Priority</label>
@@ -180,7 +178,6 @@
                                 <option value="high">High</option>
                             </select>
                         </div>
-
                         <div class="form-group">
                             <label for="category">Category</label>
                             <select id="category" name="category" required>
@@ -188,7 +185,6 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="form-group length">
                         <label for="dueDate">Due Date</label>
                         <input type="date" id="dueDate" name="dueDate" required>
@@ -198,8 +194,6 @@
                         <label for="remark">Remark</label>
                         <textarea id="remark" name="remark" placeholder="Optional notes..."></textarea>
                     </div>
-
-
                     <button type="submit" id="create_task_btn">Create Task</button>
                 </div>
             </form>
