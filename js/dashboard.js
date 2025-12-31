@@ -334,7 +334,6 @@ async function loadTasks() {
 
         // Clear existing rows except the header
         tbody.innerHTML = '';
-
         querySnapshot.forEach((doc, index) => {
             const task = doc.data();
             const row = document.createElement('tr');
