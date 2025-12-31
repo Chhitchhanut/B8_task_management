@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Management</title>
     <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="stylesheet" href="/css/smooth-animations.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="icon" href="imgs/logo.png" type="image/png">
@@ -75,10 +77,10 @@
                     <h3>Create new category</h3>
                 </div>
                 <form id="category-form">
-                    <input id="category-name" type="text" placeholder="Enter name" required maxlength="32">
+                    <input id="category-name" type="text" class="smooth-input" placeholder="Enter name" required maxlength="32">
                     <div class="modal-actions">
-                        <button type="button" class="cancel" data-close-category>Cancel</button>
-                        <button type="submit" class="done">Done</button>
+                        <button type="button" class="cancel enhanced-btn" data-close-category>Cancel</button>
+                        <button type="submit" class="done enhanced-btn">Done</button>
                     </div>
                 </form>
             </div>
@@ -87,16 +89,16 @@
         <div class="main-content-container">
             <div class="main-top">
                 <div class="summary-card-container">
-                    <div class="summary-card all " style="background-color: #afd56c;">
+                    <div class="summary-card all card-entrance smooth-hover" style="background-color: #afd56c;">
                         <h4>All Task <span>0</span></h4>
                     </div>
-                    <div class="summary-card done" style="background-color:#34cdfa;">
+                    <div class="summary-card done card-entrance smooth-hover" style="background-color:#34cdfa;">
                         <h4>Done <span>0</span></h4>
                     </div>
-                    <div class="summary-card progress" style="background-color:#07b1ef;">
+                    <div class="summary-card progress card-entrance smooth-hover" style="background-color:#07b1ef;">
                         <h4>In Progress <span>0</span></h4>
                     </div>
-                    <div class="summary-card todo" style="background-color: rgba(12, 108, 108, 0.645);">
+                    <div class="summary-card todo card-entrance smooth-hover" style="background-color: rgba(12, 108, 108, 0.645);">
                         <h4>Todo <span>0</span></h4>
                     </div>
                 </div>
@@ -124,9 +126,10 @@
 
                         <select id="categoryFilter" class="custom-select">
                             <option value="">Filter by Category</option>
+                            <option value="company">Company</option>
+                            <option value="library">Library</option>
+                            <option value="school">School</option>
                             <option value="work">Work</option>
-                            <option value="personal">Personal</option>
-                            <option value="other">Other</option>
                         </select>
                     </div>
                 </div>
@@ -149,7 +152,88 @@
                     <tbody>
                         <tr>
                             <td>1</td>
-                            <td>Sample Task 1</td>
+                            <td>Company</td>
+                            <td>
+                                <select class="status-select">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="todo">Todo</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="done">Done</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class="priority-select ">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </td>
+                            <td class="category-cell">Company</td>
+                            <td>2025-01-01</td>
+                            <td>
+                                <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
+                            </td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Library</td>
+                            <td>
+                                <select class="status-select">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="todo">Todo</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="done">Done</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class="priority-select ">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </td>
+                            <td class="category-cell">Library</td>
+                            <td>2025-01-02</td>
+                            <td>
+                                <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
+                            </td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>School</td>
+                            <td>
+                                <select class="status-select">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="todo">Todo</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="done">Done</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class="priority-select ">
+                                    <option value="" selected disabled>select here...</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </td>
+                            <td class="category-cell">School</td>
+                            <td>2025-01-03</td>
+                            <td>
+                                <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                                <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
+                            </td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Work</td>
                             <td>
                                 <select class="status-select">
                                     <option value="" selected disabled>select here...</option>
@@ -167,36 +251,7 @@
                                 </select>
                             </td>
                             <td class="category-cell">Work</td>
-                            <td>2025-01-01</td>
-                            <td>
-                                <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                                <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
-                            </td>
-                            <td>—</td>
-                        </tr>
-                        
-
-                        <tr>
-                            <td>2</td>
-                            <td>Sample Task 2</td>
-                            <td>
-                                <select class="status-select">
-                                    <option value="" selected disabled>select here...</option>
-                                    <option value="todo">Todo</option>
-                                    <option value="in-progress">In Progress</option>
-                                    <option value="done">Done</option>
-                                </select>
-                            </td>
-                            <td>
-                                <select class="priority-select ">
-                                    <option value="" selected disabled>select here...</option>
-                                    <option value="high">High</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="low">Low</option>
-                                </select>
-                            </td>
-                            <td class="category-cell">Personal</td>
-                            <td>2025-01-02</td>
+                            <td>2025-01-04</td>
                             <td>
                                 <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                                 <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
@@ -210,7 +265,10 @@
             <form class="task-form">
                 <div class="create_task_header">
                     <h2 class="create_task_title">Create New Task</h2>
-                    <button type="button" class="create-task-btn-close"></button>
+                    <button type="button" class="create-task-btn-close">
+                        <i class='bx bx-x closeIcon'></i>
+                        
+                    </button>
                 </div>
 
                 <div class="create_task_body">

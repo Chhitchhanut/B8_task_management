@@ -65,39 +65,75 @@ menuButton.addEventListener("click", hideShowBtn);
 // ----------------------------
 btnCategory.addEventListener('click', () => {
     sections.style.display = 'block';
+    sections.classList.add('show');
     mainContentContainer.style.display = 'none';
-    body.style.background = 'rgba(50, 44, 44, 0.17)';
-    allCategory.style.display = 'none';
-    downIcon.style.display = 'block';
+    document.body.style.background = 'rgba(50, 44, 44, 0.17)';
+    allCategory.style.display = 'block';
+    // Add smooth animation to modal
+    setTimeout(() => {
+        sections.querySelector('.modal-card').classList.add('scale-in');
+    }, 10);
 });
 
 cancelCategory.addEventListener('click', () => {
-    sections.style.display = 'none';
-    mainContentContainer.style.display = 'block';
-    body.style.background = 'none';
-    inputCategory.value = '';
+    sections.querySelector('.modal-card').classList.remove('scale-in');
+    setTimeout(() => {
+        sections.style.display = 'none';
+        sections.classList.remove('show');
+        document.body.style.background = 'none';
+        mainContentContainer.style.display = 'block';
+        inputCategory.value = '';
+    }, 300);
 });
 
 doneCategory.addEventListener('click', async (e) => {
     e.preventDefault();
     const newCategoryName = inputCategory.value.trim();
-    if (!newCategoryName) {
+    if (newCategoryName === '') {
         alert('Please enter a category name.');
         return;
     }
     try {
         await addDoc(collection(db, "categories"), {
-            category: newCategoryName
+            category: newCategoryName,
+            email: usernameTag.textContent
         });
 
+        // Create new category element with smooth animation
         const div = document.createElement("div");
         div.textContent = newCategoryName;
+        div.className = 'category-item';
+
+        // Add click handler for category filtering
+        div.addEventListener('click', () => {
+            // Remove active class from all category items
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.remove('active-category');
+            });
+
+            // Add active class to clicked category
+            div.classList.add('active-category');
+
+            // Set the category filter and trigger filtering
+            const categoryFilter = document.getElementById('categoryFilter');
+            if (categoryFilter) {
+                categoryFilter.value = newCategoryName;
+                categoryFilter.dispatchEvent(new Event('change'));
+            }
+        });
+
         smallCategoryDiv.appendChild(div);
 
-        inputCategory.value = '';
-        sections.style.display = 'none';
-        mainContentContainer.style.display = 'block';
-        document.body.style.background = 'none';
+        // Close modal with smooth animation
+        sections.querySelector('.modal-card').classList.remove('scale-in');
+        setTimeout(() => {
+            sections.style.display = 'none';
+            sections.classList.remove('show');
+            document.body.style.background = 'none';
+            mainContentContainer.style.display = 'block';
+            inputCategory.value = '';
+        }, 300);
+
     } catch (error) {
         console.error(error);
         alert("Failed to add category!");
@@ -105,15 +141,29 @@ doneCategory.addEventListener('click', async (e) => {
 });
 
 // ----------------------------
-// DOWN CATEGORY TOGGLE
+// DOWN CATEGORY TOGGLE - SMOOTH ANIMATION
 // ----------------------------
 downIcon.addEventListener('click', () => {
-    if (allCategory.style.display === 'none' || allCategory.style.display === '') {
+    const isHidden = allCategory.style.display === 'none' || allCategory.style.display === '';
+
+    if (isHidden) {
+        // Show dropdown with smooth animation
         allCategory.style.display = 'block';
+        allCategory.classList.add('show');
         downIcon.classList.replace('bx-chevron-down', 'bx-chevron-up');
+        downIcon.classList.add('rotated');
     } else {
-        allCategory.style.display = 'none';
+        // Hide dropdown with smooth animation
+        allCategory.classList.remove('show');
         downIcon.classList.replace('bx-chevron-up', 'bx-chevron-down');
+        downIcon.classList.remove('rotated');
+
+        // Hide after animation completes
+        setTimeout(() => {
+            if (!allCategory.classList.contains('show')) {
+                allCategory.style.display = 'none';
+            }
+        }, 400);
     }
 });
 
@@ -161,11 +211,14 @@ function filterTasks() {
     const selectedCategory = categoryFilter.value.toLowerCase();
     const searchQuery = searchInput.value.toLowerCase();
 
-    for (let row of tableRows) {
-        const taskStatus = row.querySelector('.status-select').value;
-        const taskPriority = row.querySelector('.priority-select').value;
-        const taskCategory = row.querySelector('.category-cell').textContent.toLowerCase();
-        const taskName = row.cells[1].textContent.toLowerCase();
+    // Get fresh table rows each time to include dynamically loaded tasks
+    const currentTableRows = document.querySelectorAll('tbody tr');
+
+    for (let row of currentTableRows) {
+        const taskStatus = row.querySelector('.status-select')?.value || '';
+        const taskPriority = row.querySelector('.priority-select')?.value || '';
+        const taskCategory = row.querySelector('.category-cell')?.textContent.toLowerCase() || '';
+        const taskName = row.cells[1]?.textContent.toLowerCase() || '';
 
         let showRow = true;
 
@@ -192,6 +245,7 @@ onAuthStateChanged(auth, async (user) => {
 
     usernameTag.textContent = user.displayName || user.email || "Guest";
 
+    // Load categories
     const categoriesRef = collection(db, 'categories');
     const q = query(categoriesRef, where('email', '==', user.email));
 
@@ -208,6 +262,9 @@ onAuthStateChanged(auth, async (user) => {
     } catch (err) {
         console.error('Error fetching categories:', err);
     }
+
+    // Load tasks
+    await loadTasks();
 });
 
 // ----------------------------
@@ -251,6 +308,9 @@ taskForm.addEventListener("submit", async (e) => {
         taskForm.style.display = 'none';
         mainTop.style.display = 'block';
         mainBottom.style.display = 'block';
+
+        // Reload tasks to show the new task
+        await loadTasks();
     } catch (error) {
         console.error("❌ Error adding task: ", error);
         alert("Failed to create task. Check console.");
@@ -258,17 +318,103 @@ taskForm.addEventListener("submit", async (e) => {
 });
 
 // ----------------------------
-// RENDER ALL CATEGORIES IN SIDEBAR
+// LOAD TASKS FROM FIREBASE
+// ----------------------------
+
+async function loadTasks() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const tasksRef = collection(db, "tasks");
+    const q = query(tasksRef, where('email', '==', user.email));
+
+    try {
+        const querySnapshot = await getDocs(q);
+        const tbody = document.querySelector('table tbody');
+
+        // Clear existing rows except the header
+        tbody.innerHTML = '';
+
+        querySnapshot.forEach((doc, index) => {
+            const task = doc.data();
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${task.taskName}</td>
+                <td>
+                    <select class="status-select">
+                        <option value="" selected disabled>select here...</option>
+                        <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>Todo</option>
+                        <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+                        <option value="done" ${task.status === 'done' ? 'selected' : ''}>Done</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="priority-select">
+                        <option value="" selected disabled>select here...</option>
+                        <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
+                        <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                        <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
+                    </select>
+                </td>
+                <td class="category-cell">${task.category}</td>
+                <td>${task.dueDate}</td>
+                <td>
+                    <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                    <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
+                </td>
+                <td>${task.remark || '—'}</td>
+            `;
+
+            tbody.appendChild(row);
+        });
+
+        // Update task counts after loading
+        updateTaskCounts();
+
+        // Apply current filters after loading
+        filterTasks();
+
+    } catch (error) {
+        console.error("Error loading tasks:", error);
+    }
+}
+
+
+
+// ----------------------------
+// RENDER ALL CATEGORIES IN SIDEBAR - SMOOTH ANIMATION
 // ----------------------------
 async function renderCategories() {
     smallCategoryDiv.innerHTML = "";
     try {
         const querySnapshot = await getDocs(collection(db, "categories"));
-        for (const doc of querySnapshot.docs) { 
+        querySnapshot.forEach((doc, index) => {
             const div = document.createElement("div");
             div.textContent = doc.data().category;
+            div.className = 'category-item';
+            div.style.animationDelay = `${index * 0.1}s`;
+
+            // Add click handler for category filtering
+            div.addEventListener('click', () => {
+                // Remove active class from all category items
+                document.querySelectorAll('.category-item').forEach(item => {
+                    item.classList.remove('active-category');
+                });
+
+                // Add active class to clicked category
+                div.classList.add('active-category');
+
+                // Set the category filter and trigger filtering
+                const categoryFilter = document.getElementById('categoryFilter');
+                if (categoryFilter) {
+                    categoryFilter.value = doc.data().category;
+                    categoryFilter.dispatchEvent(new Event('change'));
+                }
+            });
             smallCategoryDiv.appendChild(div);
-        }
+        });
     } catch (err) {
         console.error("Error fetching categories:", err);
     }
