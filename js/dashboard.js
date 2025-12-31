@@ -2,8 +2,16 @@
 // IMPORTS
 // ----------------------------
 import { auth, db } from './firebase-config.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { collection, addDoc, serverTimestamp, getDocs, query, where, onSnapshot, doc, updateDoc, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+import {
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+
 // ----------------------------
 // DOM ELEMENTS
 // ----------------------------
@@ -347,3 +355,110 @@ async function saveTask(row, taskId) {
         alert('Error saving: ' + error.message);
     }
 }
+
+// // When I login on gmail cat@gmail.com have new data diferent gmail doc@gmail.com
+
+
+
+
+// HTML elements
+const tBody = document.querySelector('tbody');
+const userNameDisplay = document.getElementById('userName'); // Shows email
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+
+
+// Load tasks ONLY for the current logged-in user
+function loadTasksForUser(userEmail) {
+  // This query gets only tasks where email == user's email
+  const q = query(collection(db, 'tasks'), where('email', '==', userEmail));
+
+  onSnapshot(q, (snapshot) => {
+    tbody.innerHTML = '';
+    let no = 1;
+
+    if (snapshot.empty) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px; color:#888;">No tasks yet</td></tr>';
+      return;
+    }
+
+    snapshot.forEach((docSnap) => {
+      const task = docSnap.data();
+      const row = document.createElement('tr');
+      row.dataset.id = docSnap.id;
+
+      row.innerHTML = `
+        <td>${no++}</td>
+        <td>${task.taskName || 'Untitled'}</td>
+        <td>
+          <select class="status-select">
+            <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>Todo</option>
+            <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+            <option value="done" ${task.status === 'done' ? 'selected' : ''}>Done</option>
+          </select>
+        </td>
+        <td>
+          <select class="priority-select">
+            <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
+            <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
+            <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
+          </select>
+        </td>
+        <td>${task.category || '—'}</td>
+        <td>${formatDueDate(task.dueDate)}</td>
+        <td>
+          <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+            <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
+        </td>
+        <td>${task.remark || '—'}</td>
+      `;
+
+      tbody.appendChild(row);
+    });
+  });
+}
+
+// Check login status
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User logged in
+    userNameDisplay.textContent = user.email; 
+    // Load ONLY this user's tasks
+    loadTasksForUser(user.email);
+
+  } else {
+    // No user
+    userNameDisplay.textContent = 'Guest';
+    logoutBtn.style.display = 'none';
+    loginBtn.style.display = 'inline-block';
+
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;">Please login to see your tasks</td></tr>';
+  }
+});
+
+
+
+
+
+// Status & Priority change → save to Firebase
+tbody.addEventListener('change', async (e) => {
+  if (e.target.classList.contains('status-select') || e.target.classList.contains('priority-select')) {
+    const row = e.target.closest('tr');
+    const taskId = row.dataset.id;
+    const field = e.target.classList.contains('status-select') ? 'status' : 'priority';
+    const value = e.target.value;
+
+    await updateDoc(doc(db, 'tasks', taskId), { [field]: value });
+  }
+});
+
+// Delete task
+tbody.addEventListener('click', async (e) => {
+  if (e.target.closest('.delete-btn')) {
+    if (confirm('Delete this task?')) {
+      const row = e.target.closest('tr');
+      await deleteDoc(doc(db, 'tasks', row.dataset.id));
+    }
+  }
+});
+
