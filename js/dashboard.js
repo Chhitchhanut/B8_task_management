@@ -1,9 +1,9 @@
 // ----------------------------
 // IMPORTS
 // ----------------------------
-import { auth, db } from '/js/firebase-config.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { collection, addDoc, serverTimestamp, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { db, auth } from './firebase-config.js';
+import { collection, addDoc, getDocs, query, where, onSnapshot, doc, updateDoc, deleteDoc, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
 // ----------------------------
 // DOM ELEMENTS
@@ -44,6 +44,20 @@ const searchInput = document.getElementById('categorySearch');
 const searchBtn = document.getElementById('searchBtn');
 const tableBody = document.querySelector('table tbody');
 const tableRows = document.querySelectorAll('tbody tr');
+
+// Current user tracking
+let currentUser = null;
+
+// Check authentication state
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        currentUser = user;
+        renderCategories();
+    } else {
+        // Redirect to login if not authenticated
+        window.location.href = "index.html";
+    }
+});
 
 // ----------------------------
 // MENU BUTTON LOGIC
@@ -94,9 +108,14 @@ doneCategory.addEventListener('click', async (e) => {
         return;
     }
     try {
+        if (!currentUser) {
+            alert("Please log in to create categories");
+            return;
+        }
+        
         await addDoc(collection(db, "categories"), {
             category: newCategoryName,
-            email: usernameTag.textContent
+            email: currentUser.email
         });
 
         // Create new category element with smooth animation
@@ -284,7 +303,12 @@ createTaskBtnClose.addEventListener('click', () => {
 
 taskForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = usernameTag.textContent;
+    if (!currentUser) {
+        alert("Please log in to create tasks");
+        return;
+    }
+    
+    const email = currentUser.email;
     const taskName = document.getElementById("taskName").value;
     const priority = document.getElementById("priority").value;
     const status = 'todo';
@@ -315,6 +339,291 @@ taskForm.addEventListener("submit", async (e) => {
         console.error("❌ Error adding task: ", error);
         alert("Failed to create task. Check console.");
     }
+});
+
+// >>>>>>>>>>>>>>>>>>>>>>>> Task Table >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+const tbody = document.querySelector('tbody');
+
+// ADD THIS LINE — THIS FIXES CANCEL!
+let originalRowHTML = '';  // Stores the row HTML before editing
+
+function formatDueDate(timestamp) {
+    if (!timestamp) return '—';
+    try {
+        const date = timestamp.toDate();
+        return date.toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    } catch (e) {
+        return '—';
+    }
+}
+
+function parseFlexibleDate(text) {
+    if (!text || text.trim() === '' || text === '—') return null;
+    const cleaned = text.trim();
+    
+    const parsed = new Date(cleaned);
+    if (!isNaN(parsed)) return parsed;
+
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    const parsedGB = new Intl.DateTimeFormat('en-GB', options).parse(cleaned);
+    if (parsedGB) return parsedGB;
+
+    return null;
+}
+
+function escapeHtml(text) {
+    if (!text) return '—';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Load tasks
+const tasksCol = query(collection(db, 'tasks'), orderBy('dueDate'));
+onSnapshot(tasksCol, (snapshot) => {
+    tbody.innerHTML = '';
+    let no = 1;
+    snapshot.docs.forEach(docSnap => {
+        const data = docSnap.data();
+        const row = document.createElement('tr');
+        row.dataset.id = docSnap.id;
+
+        row.innerHTML = `
+            <td>${no++}</td>
+            <td>${escapeHtml(data.taskName || 'Untitled')}</td>
+            <td>
+                <select class="status-select">
+                    <option value="todo" ${data.status === 'todo' ? 'selected' : ''}>Todo</option>
+                    <option value="in-progress" ${data.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+                    <option value="done" ${data.status === 'done' ? 'selected' : ''}>Done</option>
+                </select>
+            </td>
+            <td>
+                <select class="priority-select">
+                    <option value="high" ${data.priority === 'high' ? 'selected' : ''}>High</option>
+                    <option value="medium" ${data.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                    <option value="low" ${data.priority === 'low' ? 'selected' : ''}>Low</option>
+                </select>
+            </td>
+            <td>${escapeHtml(data.category || '—')}</td>
+            <td>${formatDueDate(data.dueDate)}</td>
+            <td>
+                <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
+            </td>
+            <td>${escapeHtml(data.remark || '—')}</td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // Optional: Show message if no tasks
+    if (snapshot.empty) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888; padding:30px;">No tasks yet</td></tr>';
+    }
+});
+
+// Click handlers
+tbody.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    const row = btn.closest('tr');
+    const taskId = row.dataset.id;
+
+    if (btn.classList.contains('delete-btn')) {
+        if (confirm('Delete this task?')) {
+            await deleteDoc(doc(db, 'tasks', taskId));
+        }
+
+    } else if (btn.classList.contains('edit-btn')) {
+        enterEditMode(row);
+
+    } else if (btn.classList.contains('save-btn')) {
+        await saveTask(row, taskId);
+
+    } else if (btn.classList.contains('cancel-btn')) {
+        // NOW THIS WORKS — restores everything perfectly!
+        row.innerHTML = originalRowHTML;
+        row.classList.remove('editing');
+    }
+});
+
+tbody.addEventListener('change', async (e) => {
+    if (e.target.matches('.status-select, .priority-select')) {
+        const row = e.target.closest('tr');
+        const field = e.target.classList.contains('status-select') ? 'status' : 'priority';
+        await updateDoc(doc(db, 'tasks', row.dataset.id), { [field]: e.target.value });
+    }
+});
+
+// EDIT MODE
+function enterEditMode(row) {
+    if (row.classList.contains('editing')) return;
+
+    // SAVE THE ORIGINAL ROW HTML BEFORE CHANGING ANYTHING
+    originalRowHTML = row.innerHTML;
+
+    row.classList.add('editing');
+
+    const currentDisplayDate = row.cells[5].textContent.trim();
+
+    row.cells[1].innerHTML = `<input type="text" class="edit-input" value="${escapeHtml(row.cells[1].textContent)}">`;
+    row.cells[4].innerHTML = `<input type="text" class="edit-input" value="${row.cells[4].textContent === '—' ? '' : row.cells[4].textContent}">`;
+    row.cells[5].innerHTML = `<input type="text" class="edit-input" placeholder="e.g. 27 December 2025" value="${currentDisplayDate === '—' ? '' : currentDisplayDate}">`;
+    row.cells[7].innerHTML = `<input type="text" class="edit-input" value="${row.cells[7].textContent === '—' ? '' : row.cells[7].textContent}">`;
+
+    row.cells[6].innerHTML = `
+        <button class="save-btn"><i class="fa-solid fa-check"></i> Save</button>
+        <button class="cancel-btn"><i class="fa-solid fa-xmark"></i> Cancel</button>
+    `;
+}
+
+// SAVE TASK
+async function saveTask(row, taskId) {
+    const inputs = row.querySelectorAll('.edit-input');
+    const taskName = inputs[0].value.trim();
+    const category = inputs[1].value.trim();
+    const dueDateText = inputs[2].value.trim();
+    const remark = inputs[3].value.trim();
+
+    if (!taskName) {
+        alert('Task Name is required!');
+        return;
+    }
+
+    const updateData = {
+        taskName,
+        category: category || null,
+        remark: remark || null,
+        status: row.querySelector('.status-select').value,
+        priority: row.querySelector('.priority-select').value
+    };
+
+    const parsedDate = parseFlexibleDate(dueDateText);
+    if (dueDateText && !parsedDate) {
+        alert('Please enter a valid date (e.g. 27 December 2025)');
+        return;
+    }
+    updateData.dueDate = parsedDate;
+
+    try {
+        await updateDoc(doc(db, 'tasks', taskId), updateData);
+        row.classList.remove('editing');
+    } catch (error) {
+        alert('Error saving: ' + error.message);
+    }
+}
+
+// // When I login on gmail cat@gmail.com have new data diferent gmail doc@gmail.com
+
+
+
+
+// HTML elements
+const tBody = document.querySelector('tbody');
+const userNameDisplay = document.getElementById('userName'); // Shows email
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+
+
+// Load tasks ONLY for the current logged-in user
+function loadTasksForUser(userEmail) {
+  // This query gets only tasks where email == user's email
+  const q = query(collection(db, 'tasks'), where('email', '==', userEmail));
+
+  onSnapshot(q, (snapshot) => {
+    tbody.innerHTML = '';
+    let no = 1;
+
+    if (snapshot.empty) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px; color:#888;">No tasks yet</td></tr>';
+      return;
+    }
+
+    snapshot.forEach((docSnap) => {
+      const task = docSnap.data();
+      const row = document.createElement('tr');
+      row.dataset.id = docSnap.id;
+
+      row.innerHTML = `
+        <td>${no++}</td>
+        <td>${task.taskName || 'Untitled'}</td>
+        <td>
+          <select class="status-select">
+            <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>Todo</option>
+            <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+            <option value="done" ${task.status === 'done' ? 'selected' : ''}>Done</option>
+          </select>
+        </td>
+        <td>
+          <select class="priority-select">
+            <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
+            <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
+            <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
+          </select>
+        </td>
+        <td>${task.category || '—'}</td>
+        <td>${formatDueDate(task.dueDate)}</td>
+        <td>
+          <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+            <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
+        </td>
+        <td>${task.remark || '—'}</td>
+      `;
+
+      tbody.appendChild(row);
+    });
+  });
+}
+
+// Check login status
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User logged in
+    userNameDisplay.textContent = user.email; 
+    // Load ONLY this user's tasks
+    loadTasksForUser(user.email);
+
+  } else {
+    // No user
+    userNameDisplay.textContent = 'Guest';
+    logoutBtn.style.display = 'none';
+    loginBtn.style.display = 'inline-block';
+
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;">Please login to see your tasks</td></tr>';
+  }
+});
+
+
+
+
+
+// Status & Priority change → save to Firebase
+tbody.addEventListener('change', async (e) => {
+  if (e.target.classList.contains('status-select') || e.target.classList.contains('priority-select')) {
+    const row = e.target.closest('tr');
+    const taskId = row.dataset.id;
+    const field = e.target.classList.contains('status-select') ? 'status' : 'priority';
+    const value = e.target.value;
+
+    await updateDoc(doc(db, 'tasks', taskId), { [field]: value });
+  }
+});
+
+// Delete task
+tbody.addEventListener('click', async (e) => {
+  if (e.target.closest('.delete-btn')) {
+    if (confirm('Delete this task?')) {
+      const row = e.target.closest('tr');
+      await deleteDoc(doc(db, 'tasks', row.dataset.id));
+    }
+  }
 });
 
 // ----------------------------
@@ -387,8 +696,11 @@ async function loadTasks() {
 // ----------------------------
 async function renderCategories() {
     smallCategoryDiv.innerHTML = "";
+    if (!currentUser) return;
+    
     try {
-        const querySnapshot = await getDocs(collection(db, "categories"));
+        const q = query(collection(db, "categories"), where("email", "==", currentUser.email));
+        const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc, index) => {
             const div = document.createElement("div");
             div.textContent = doc.data().category;
@@ -418,4 +730,3 @@ async function renderCategories() {
         console.error("Error fetching categories:", err);
     }
 }
-renderCategories();
