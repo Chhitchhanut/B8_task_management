@@ -112,7 +112,7 @@ doneCategory.addEventListener('click', async (e) => {
             alert("Please log in to create categories");
             return;
         }
-        
+
         await addDoc(collection(db, "categories"), {
             category: newCategoryName,
             email: currentUser.email
@@ -307,7 +307,7 @@ taskForm.addEventListener("submit", async (e) => {
         alert("Please log in to create tasks");
         return;
     }
-    
+
     const email = currentUser.email;
     const taskName = document.getElementById("taskName").value;
     const priority = document.getElementById("priority").value;
@@ -366,7 +366,7 @@ function formatDueDate(timestamp) {
 function parseFlexibleDate(text) {
     if (!text || text.trim() === '' || text === '—') return null;
     const cleaned = text.trim();
-    
+
     const parsed = new Date(cleaned);
     if (!isNaN(parsed)) return parsed;
 
@@ -534,24 +534,24 @@ const logoutBtn = document.getElementById('logoutBtn');
 
 // Load tasks ONLY for the current logged-in user
 function loadTasksForUser(userEmail) {
-  // This query gets only tasks where email == user's email
-  const q = query(collection(db, 'tasks'), where('email', '==', userEmail));
+    // This query gets only tasks where email == user's email
+    const q = query(collection(db, 'tasks'), where('email', '==', userEmail));
 
-  onSnapshot(q, (snapshot) => {
-    tbody.innerHTML = '';
-    let no = 1;
+    onSnapshot(q, (snapshot) => {
+        tbody.innerHTML = '';
+        let no = 1;
 
-    if (snapshot.empty) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px; color:#888;">No tasks yet</td></tr>';
-      return;
-    }
+        if (snapshot.empty) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px; color:#888;">No tasks yet</td></tr>';
+            return;
+        }
 
-    snapshot.forEach((docSnap) => {
-      const task = docSnap.data();
-      const row = document.createElement('tr');
-      row.dataset.id = docSnap.id;
+        snapshot.forEach((docSnap) => {
+            const task = docSnap.data();
+            const row = document.createElement('tr');
+            row.dataset.id = docSnap.id;
 
-      row.innerHTML = `
+            row.innerHTML = `
         <td>${no++}</td>
         <td>${task.taskName || 'Untitled'}</td>
         <td>
@@ -577,27 +577,27 @@ function loadTasksForUser(userEmail) {
         <td>${task.remark || '—'}</td>
       `;
 
-      tbody.appendChild(row);
+            tbody.appendChild(row);
+        });
     });
-  });
 }
 
 // Check login status
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User logged in
-    userNameDisplay.textContent = user.email; 
-    // Load ONLY this user's tasks
-    loadTasksForUser(user.email);
+    if (user) {
+        // User logged in
+        userNameDisplay.textContent = user.email;
+        // Load ONLY this user's tasks
+        loadTasksForUser(user.email);
 
-  } else {
-    // No user
-    userNameDisplay.textContent = 'Guest';
-    logoutBtn.style.display = 'none';
-    loginBtn.style.display = 'inline-block';
+    } else {
+        // No user
+        userNameDisplay.textContent = 'Guest';
+        logoutBtn.style.display = 'none';
+        loginBtn.style.display = 'inline-block';
 
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;">Please login to see your tasks</td></tr>';
-  }
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;">Please login to see your tasks</td></tr>';
+    }
 });
 
 
@@ -606,24 +606,24 @@ onAuthStateChanged(auth, (user) => {
 
 // Status & Priority change → save to Firebase
 tbody.addEventListener('change', async (e) => {
-  if (e.target.classList.contains('status-select') || e.target.classList.contains('priority-select')) {
-    const row = e.target.closest('tr');
-    const taskId = row.dataset.id;
-    const field = e.target.classList.contains('status-select') ? 'status' : 'priority';
-    const value = e.target.value;
+    if (e.target.classList.contains('status-select') || e.target.classList.contains('priority-select')) {
+        const row = e.target.closest('tr');
+        const taskId = row.dataset.id;
+        const field = e.target.classList.contains('status-select') ? 'status' : 'priority';
+        const value = e.target.value;
 
-    await updateDoc(doc(db, 'tasks', taskId), { [field]: value });
-  }
+        await updateDoc(doc(db, 'tasks', taskId), { [field]: value });
+    }
 });
 
 // Delete task
 tbody.addEventListener('click', async (e) => {
-  if (e.target.closest('.delete-btn')) {
-    if (confirm('Delete this task?')) {
-      const row = e.target.closest('tr');
-      await deleteDoc(doc(db, 'tasks', row.dataset.id));
+    if (e.target.closest('.delete-btn')) {
+        if (confirm('Delete this task?')) {
+            const row = e.target.closest('tr');
+            await deleteDoc(doc(db, 'tasks', row.dataset.id));
+        }
     }
-  }
 });
 
 // ----------------------------
@@ -697,7 +697,7 @@ async function loadTasks() {
 async function renderCategories() {
     smallCategoryDiv.innerHTML = "";
     if (!currentUser) return;
-    
+
     try {
         const q = query(collection(db, "categories"), where("email", "==", currentUser.email));
         const querySnapshot = await getDocs(q);
@@ -730,3 +730,50 @@ async function renderCategories() {
         console.error("Error fetching categories:", err);
     }
 }
+
+
+// ======================================================
+
+// Wait for page to be ready
+setTimeout(function () {
+
+    // Get all category items
+    const categories = document.querySelectorAll('.category-item');
+    const rows = document.querySelectorAll('tbody tr');
+    // Add click handlers to each category
+    categories.forEach((category, index) => {
+
+        category.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Remove active from all
+            categories.forEach(cat => cat.classList.remove('active-category'));
+            // Add active to clicked
+            this.classList.add('active-category');
+            // Get the category name
+            const categoryName = this.textContent.trim();
+            // Filter rows
+            rows.forEach((row, rowIndex) => {
+                const rowCategory = row.querySelector('.category-cell').textContent.trim();
+                if (rowCategory === categoryName) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+    // All Tasks click handler
+    const allTasks = document.querySelector('.all_task');
+    if (allTasks) {
+        allTasks.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            categories.forEach(cat => cat.classList.remove('active-category'));
+            rows.forEach(row => row.style.display = '');
+        });
+    }
+
+    console.log('Category filtering setup complete!');
+}, 1000);
