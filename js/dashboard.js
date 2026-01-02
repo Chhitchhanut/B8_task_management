@@ -259,60 +259,170 @@ searchInput.addEventListener('input', filterTasks);
 // ----------------------------
 // AUTH / USER INFO
 // ----------------------------
+let rateChart = null; 
+
 onAuthStateChanged(auth, async (user) => {
     if (!user) return;
 
+    // USER NAME
+    // ---------------------------
     usernameTag.textContent = user.displayName || user.email || "Guest";
 
-    // Load categories
+    // LOAD CATEGORIES
+    // ---------------------------
     const categoriesRef = collection(db, 'categories');
-    const q = query(categoriesRef, where('email', '==', user.email));
+    const catQuery = query(categoriesRef, where('email', '==', user.email));
 
     try {
-        // Clear existing options first
         categorySelect.innerHTML = '';
         categoryFilter.innerHTML = '';
-        
-        // Add placeholder option for task creation dropdown
+
         const placeholderOption = document.createElement('option');
         placeholderOption.value = '';
         placeholderOption.textContent = '-- Select Category --';
-        placeholderOption.selected = true;
         placeholderOption.disabled = true;
+        placeholderOption.selected = true;
         categorySelect.appendChild(placeholderOption);
-        
-        // Add placeholder option for filter dropdown
-        const filterPlaceholderOption = document.createElement('option');
-        filterPlaceholderOption.value = '';
-        filterPlaceholderOption.textContent = 'Filter by Category';
-        filterPlaceholderOption.selected = true;
-        categoryFilter.appendChild(filterPlaceholderOption);
-        
-        // Add user's categories to both dropdowns
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            const categoryData = doc.data();
-            
-            // Add to task creation dropdown
-            const option = document.createElement('option');
-            option.value = categoryData.category;
-            option.textContent = categoryData.category;
-            categorySelect.appendChild(option);
-            
-            // Add to filter dropdown
-            const filterOption = document.createElement('option');
-            filterOption.value = categoryData.category;
-            filterOption.textContent = categoryData.category;
-            categoryFilter.appendChild(filterOption);
+
+        const filterPlaceholder = document.createElement('option');
+        filterPlaceholder.value = '';
+        filterPlaceholder.textContent = 'Filter by Category';
+        filterPlaceholder.selected = true;
+        categoryFilter.appendChild(filterPlaceholder);
+
+        const catSnapshot = await getDocs(catQuery);
+        catSnapshot.forEach(doc => {
+            const { category } = doc.data();
+
+            const opt1 = document.createElement('option');
+            opt1.value = category;
+            opt1.textContent = category;
+            categorySelect.appendChild(opt1);
+
+            const opt2 = document.createElement('option');
+            opt2.value = category;
+            opt2.textContent = category;
+            categoryFilter.appendChild(opt2);
         });
-        console.log('Categories loaded:', querySnapshot.size);
     } catch (err) {
-        console.error('Error fetching categories:', err);
+        console.error('Category error:', err);
     }
 
-    // Load tasks
-    await loadTasks();
+    // LOAD TASKS
+    // ---------------------------
+    const tasksRef = collection(db, "tasks");
+    const taskQuery = query(tasksRef, where('email', '==', user.email));
+    const taskSnapshot = await getDocs(taskQuery);
+
+    const tasks = taskSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    }));
+
+    // COUNT TASKS
+    // ---------------------------
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(t => t.status === "done").length;
+    const incompleteTasks = tasks.filter(t => t.status !== "done").length;
+
+    document.getElementById("rate-all-tasks").textContent = totalTasks;
+    document.getElementById("rate-completed-tasks").textContent = completedTasks;
+    document.getElementById("rate-incomplete-tasks").textContent = incompleteTasks;
+
+    // TABLE
+    // ---------------------------
+    const rateTableBody = document.getElementById("rate-task-table-body");
+    const btnCompleted = document.querySelector('.rate-completed-btn');
+    const btnIncomplete = document.querySelector('.rate-incomplete-btn');
+
+    function renderTasks(list) {
+        rateTableBody.innerHTML = '';
+        list.forEach(task => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${task.taskName}</td>
+                <td class="rate-status-${task.status.toLowerCase()}">${task.status}</td>
+                <td>${task.category}</td>
+                <td>${task.dueDate}</td>
+            `;
+            rateTableBody.appendChild(tr);
+        });
+    }
+
+    function setActive(type) {
+        btnCompleted.classList.remove('rate-btn-active');
+        btnIncomplete.classList.remove('rate-btn-active-incomplete');
+
+        if (type === 'completed') btnCompleted.classList.add('rate-btn-active');
+        if (type === 'incomplete') btnIncomplete.classList.add('rate-btn-active-incomplete');
+    }
+
+    // Default view
+    // ---------------------------
+    renderTasks(tasks.filter(t => t.status === "done"));
+    setActive('completed');
+
+    btnCompleted.addEventListener('click', () => {
+        renderTasks(tasks.filter(t => t.status === "done"));
+        setActive('completed');
+    });
+
+    btnIncomplete.addEventListener('click', () => {
+        renderTasks(tasks.filter(t => t.status !== "done"));
+        setActive('incomplete');
+    });
+
+    // PIE CHART (FIXED)
+    // ---------------------------
+    const perfomanceBtn = document.querySelector('.rate');
+    const perfomanceSec = document.querySelector('.completed-rate');
+
+    perfomanceBtn.addEventListener('click', () => {
+        perfomanceBtn.classList.add('nav-active');
+        perfomanceSec.style.display = 'block';
+        mainTop.style.display = 'none';
+        mainBottom.style.display = 'none';
+
+        // 🔥 Create chart ONLY when visible
+        if (!rateChart) {
+            const ctx = document
+                .getElementById('rate-taskChart')
+                .getContext('2d');
+
+            rateChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Completed', 'Incomplete'],
+                    datasets: [{
+                        data: [completedTasks, incompleteTasks],
+                        backgroundColor: ['#3b82f6', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const value = context.raw;
+                                    const percent = ((value / total) * 100).toFixed(1);
+                                    return `${context.label}: ${percent}% (${value})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
 });
+
+
 
 // ----------------------------
 // TASK MODAL LOGIC
@@ -321,6 +431,7 @@ showCreateTaskBtn.addEventListener('click', () => {
     mainTop.style.display = 'none';
     mainBottom.style.display = 'none';
     taskForm.style.display = 'block';
+    perfomanceSec.style.display = 'none';
 });
 
 createTaskBtnClose.addEventListener('click', () => {
@@ -394,7 +505,7 @@ function formatDueDate(timestamp) {
 function parseFlexibleDate(text) {
     if (!text || text.trim() === '' || text === '—') return null;
     const cleaned = text.trim();
-    
+
     const parsed = new Date(cleaned);
     if (!isNaN(parsed)) return parsed;
 
@@ -835,3 +946,97 @@ setTimeout(function () {
         });
     }
 }, 1000);
+
+
+
+const perfomanceBtn = document.querySelector('.rate');
+const perfomanceSec = document.querySelector('.completed-rate');
+perfomanceBtn.addEventListener('click', () => {
+    perfomanceBtn.classList.add('nav-active')
+    perfomanceSec.style.display = 'block';
+    mainTop.style.display = 'none';
+    mainBottom.style.display = 'none';
+})
+
+// Example tasks
+
+const tasksRef = collection(db, "tasks");
+const q = query(tasksRef, where('email', '==', auth.currentUser.email));
+const querySnapshot = await getDocs(q);
+
+
+
+// Count tasks
+const totalTasks = querySnapshot.length;
+const completedTasks = tasks.filter(t => t.status === "done").length;
+const incompleteTasks = tasks.filter(t => t.status !== "done").length;
+
+// Update cards
+document.getElementById("rate-all-tasks").textContent = totalTasks;
+document.getElementById("rate-completed-tasks").textContent = completedTasks;
+document.getElementById("rate-incomplete-tasks").textContent = incompleteTasks;
+
+// Populate table
+const rateTableBody = document.getElementById("rate-task-table-body");
+
+// Reference buttons
+const btnCompleted = document.querySelector('.rate-completed-btn');
+const btnIncomplete = document.querySelector('.rate-incomplete-btn');
+
+// Function to render tasks in table
+function renderTasks(filteredTasks) {
+    rateTableBody.innerHTML = '';
+    filteredTasks.forEach(task => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+      <td>${task.name}</td>
+      <td class="rate-status-${task.status.toLowerCase()}">${task.status}</td>
+      <td class="rate-category">${task.category}</td>
+      <td class="rate-dueDate">${task.dueDate}</td>
+    `;
+        rateTableBody.appendChild(tr);
+    });
+}
+
+// Function to update active button
+function setActiveButton(btnType) {
+    btnCompleted.classList.remove('rate-btn-active');
+    btnIncomplete.classList.remove('rate-btn-active-incomplete');
+
+    if (btnType === 'completed') btnCompleted.classList.add('rate-btn-active');
+    if (btnType === 'incomplete') btnIncomplete.classList.add('rate-btn-active-incomplete');
+}
+
+// Initial view: show Completed tasks
+renderTasks(querySnapshot.filter(t => t.status === "done"));
+setActiveButton('completed');
+
+// Event listeners
+btnCompleted.addEventListener('click', () => {
+    renderTasks(tasks.filter(t => t.status === "done"));
+    setActiveButton('completed');
+});
+
+btnIncomplete.addEventListener('click', () => {
+    renderTasks(tasks.filter(t => t.status !== "done"));
+    setActiveButton('incomplete');
+});
+
+// Chart.js Pie Chart
+const ctx = document.getElementById('rate-taskChart').getContext('2d');
+new Chart(ctx, {
+    type: 'pie',
+    data: {
+        labels: ['Completed', 'Incomplete'],
+        datasets: [{
+            data: [completedTasks, incompleteTasks],
+            backgroundColor: ['#3b82f6', '#ef4444'],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } },
+        maintainAspectRatio: false
+    }
+});
