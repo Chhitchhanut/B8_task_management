@@ -324,6 +324,7 @@ taskForm.addEventListener("submit", async (e) => {
     }
 });
 
+
 // >>>>>>>>>>>>>>>>>>>>>>>> Task Table >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 // >>>>>>>>>>>>>>>>>>>>>>>> Task Table >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -439,6 +440,8 @@ tbody.addEventListener('click', async (e) => {
     }
 });
 
+
+
 tbody.addEventListener('change', async (e) => {
     if (e.target.matches('.status-select, .priority-select')) {
         const row = e.target.closest('tr');
@@ -536,6 +539,8 @@ function loadTasksForUser(userEmail) {
       const task = docSnap.data();
       const row = document.createElement('tr');
       row.dataset.id = docSnap.id;
+
+
 
       row.innerHTML = `
         <td>${no++}</td>
