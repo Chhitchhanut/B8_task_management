@@ -68,3 +68,24 @@ loginBtn.addEventListener("click", async (e) => {
         alert("Login failed: " + error.message);
     }
 });
+
+// ----------------------------
+// PASSWORD TOGGLE FUNCTIONALITY
+// ----------------------------
+const passwordToggles = document.querySelectorAll('.password-toggle');
+
+passwordToggles.forEach(toggle => {
+    toggle.addEventListener('click', () => {
+        const passwordInput = toggle.previousElementSibling;
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggle.classList.remove('bx-hide');
+            toggle.classList.add('bx-show');
+        } else {
+            passwordInput.type = 'password';
+            toggle.classList.remove('bx-show');
+            toggle.classList.add('bx-hide');
+        }
+    });
+});

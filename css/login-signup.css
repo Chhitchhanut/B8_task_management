@@ -56,6 +56,29 @@ body {
     border: 1px solid #ccc;
     background-color: rgba(173, 216, 230, 0.299);
 }
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    padding-right: 40px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    color: white;
+    font-size: 18px;
+    transition: color 0.3s;
+}
+
+.password-toggle:hover {
+    color: #007bff;
+}
 .input-group input::placeholder{
     color: white;
 }

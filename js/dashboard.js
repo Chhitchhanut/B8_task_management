@@ -895,3 +895,16 @@ setTimeout(function () {
     }
 }, 1000);
 
+
+const logoutBtn = document.querySelector('.logout');
+
+logoutBtn.addEventListener('click', async () => {
+    try {
+        await signOut(auth);
+        alert('Logged out successfully!');
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Logout error:', error);
+        alert('Logout failed. Please try again.');
+    }
+});

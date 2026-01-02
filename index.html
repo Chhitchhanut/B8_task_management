@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Login & Signup</title>
     <link rel="stylesheet" href="css/login-signup.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
     <!-- LOGIN BOX -->
@@ -16,7 +17,10 @@
             </div>
             <div class="input-group">
                 <label>Password</label>
-                <input type="password" placeholder="Enter your password" name="password" required>
+                <div class="password-wrapper">
+                    <input type="password" placeholder="Enter your password" name="password" required>
+                    <i class="bx bx-hide password-toggle" data-target="login"></i>
+                </div>
             </div>
             <button type="submit">Login</button>
         </form>
@@ -41,7 +45,10 @@
             </div>
             <div class="input-group">
                 <label>Password</label>
-                <input type="password" placeholder="Password" name="password" required>
+                <div class="password-wrapper">
+                    <input type="password" placeholder="Password" name="password" required>
+                    <i class="bx bx-hide password-toggle" data-target="signup"></i>
+                </div>
             </div>
             <button type="submit">Sign Up</button>
         </form>
