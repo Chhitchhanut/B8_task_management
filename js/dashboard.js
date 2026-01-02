@@ -100,6 +100,7 @@ cancelCategory.addEventListener('click', () => {
     }, 300);
 });
 
+
 doneCategory.addEventListener('click', async (e) => {
     e.preventDefault();
     const newCategoryName = inputCategory.value.trim();
@@ -107,6 +108,13 @@ doneCategory.addEventListener('click', async (e) => {
         alert('Please enter a category name.');
         return;
     }
+    
+    // Prevent creating gmail categories
+    if (newCategoryName.toLowerCase().includes('gmail')) {
+        alert('Gmail categories cannot be created.');
+        return;
+    }
+    
     try {
         if (!currentUser) {
             alert("Please log in to create categories");
@@ -142,6 +150,18 @@ doneCategory.addEventListener('click', async (e) => {
         });
 
         smallCategoryDiv.appendChild(div);
+
+        // Also add to the task form category dropdown
+        const option = document.createElement('option');
+        option.value = newCategoryName;
+        option.textContent = newCategoryName;
+        categorySelect.appendChild(option);
+
+        // Also add to the category filter dropdown
+        const filterOption = document.createElement('option');
+        filterOption.value = newCategoryName;
+        filterOption.textContent = newCategoryName;
+        categoryFilter.appendChild(filterOption);
 
         // Close modal with smooth animation
         sections.querySelector('.modal-card').classList.remove('scale-in');
@@ -196,6 +216,7 @@ function updateTaskCounts() {
     const todoCard = document.querySelector('.summary-card.todo span');
     const statusSelects = document.querySelectorAll('.status-select');
 
+
     let all = statusSelects.length;
     let done = 0;
     let inProgress = 0;
@@ -236,7 +257,7 @@ function filterTasks() {
     for (let row of currentTableRows) {
         const taskStatus = row.querySelector('.status-select')?.value || '';
         const taskPriority = row.querySelector('.priority-select')?.value || '';
-        const taskCategory = row.querySelector('.category-cell')?.textContent.toLowerCase() || '';
+        const taskCategory = row.querySelector('.category-select')?.value.toLowerCase() || '';
         const taskName = row.cells[1]?.textContent.toLowerCase() || '';
 
         let showRow = true;
@@ -259,57 +280,45 @@ searchInput.addEventListener('input', filterTasks);
 // ----------------------------
 // AUTH / USER INFO
 // ----------------------------
-let rateChart = null; 
+let rateChart; // Make sure this is declared globally
 
 onAuthStateChanged(auth, async (user) => {
     if (!user) return;
 
     // USER NAME
-    // ---------------------------
     usernameTag.textContent = user.displayName || user.email || "Guest";
 
     // LOAD CATEGORIES
-    // ---------------------------
     const categoriesRef = collection(db, 'categories');
     const catQuery = query(categoriesRef, where('email', '==', user.email));
 
     try {
-        categorySelect.innerHTML = '';
-        categoryFilter.innerHTML = '';
-
-        const placeholderOption = document.createElement('option');
-        placeholderOption.value = '';
-        placeholderOption.textContent = '-- Select Category --';
-        placeholderOption.disabled = true;
-        placeholderOption.selected = true;
-        categorySelect.appendChild(placeholderOption);
-
-        const filterPlaceholder = document.createElement('option');
-        filterPlaceholder.value = '';
-        filterPlaceholder.textContent = 'Filter by Category';
-        filterPlaceholder.selected = true;
-        categoryFilter.appendChild(filterPlaceholder);
+        // Clear dropdowns
+        categorySelect.innerHTML = '<option value="" selected disabled>-- Select Category --</option>';
+        categoryFilter.innerHTML = '<option value="">Filter by Category</option>';
 
         const catSnapshot = await getDocs(catQuery);
         catSnapshot.forEach(doc => {
             const { category } = doc.data();
+            if (category && !category.toLowerCase().includes('gmail') && category.trim() !== '') {
+                // Task form dropdown
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
 
-            const opt1 = document.createElement('option');
-            opt1.value = category;
-            opt1.textContent = category;
-            categorySelect.appendChild(opt1);
-
-            const opt2 = document.createElement('option');
-            opt2.value = category;
-            opt2.textContent = category;
-            categoryFilter.appendChild(opt2);
+                // Filter dropdown
+                const filterOption = document.createElement('option');
+                filterOption.value = category;
+                filterOption.textContent = category;
+                categoryFilter.appendChild(filterOption);
+            }
         });
     } catch (err) {
         console.error('Category error:', err);
     }
 
     // LOAD TASKS
-    // ---------------------------
     const tasksRef = collection(db, "tasks");
     const taskQuery = query(tasksRef, where('email', '==', user.email));
     const taskSnapshot = await getDocs(taskQuery);
@@ -320,7 +329,6 @@ onAuthStateChanged(auth, async (user) => {
     }));
 
     // COUNT TASKS
-    // ---------------------------
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter(t => t.status === "done").length;
     const incompleteTasks = tasks.filter(t => t.status !== "done").length;
@@ -330,7 +338,6 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("rate-incomplete-tasks").textContent = incompleteTasks;
 
     // TABLE
-    // ---------------------------
     const rateTableBody = document.getElementById("rate-task-table-body");
     const btnCompleted = document.querySelector('.rate-completed-btn');
     const btnIncomplete = document.querySelector('.rate-incomplete-btn');
@@ -343,7 +350,7 @@ onAuthStateChanged(auth, async (user) => {
                 <td>${task.taskName}</td>
                 <td class="rate-status-${task.status.toLowerCase()}">${task.status}</td>
                 <td>${task.category}</td>
-                <td>${task.dueDate}</td>
+                <td>${task.remark}</td>
             `;
             rateTableBody.appendChild(tr);
         });
@@ -358,7 +365,6 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     // Default view
-    // ---------------------------
     renderTasks(tasks.filter(t => t.status === "done"));
     setActive('completed');
 
@@ -372,8 +378,7 @@ onAuthStateChanged(auth, async (user) => {
         setActive('incomplete');
     });
 
-    // PIE CHART (FIXED)
-    // ---------------------------
+    // PIE CHART
     const perfomanceBtn = document.querySelector('.rate');
     const perfomanceSec = document.querySelector('.completed-rate');
 
@@ -383,12 +388,9 @@ onAuthStateChanged(auth, async (user) => {
         mainTop.style.display = 'none';
         mainBottom.style.display = 'none';
 
-        // 🔥 Create chart ONLY when visible
+        // Only create chart once
         if (!rateChart) {
-            const ctx = document
-                .getElementById('rate-taskChart')
-                .getContext('2d');
-
+            const ctx = document.getElementById('rate-taskChart').getContext('2d');
             rateChart = new Chart(ctx, {
                 type: 'pie',
                 data: {
@@ -402,9 +404,7 @@ onAuthStateChanged(auth, async (user) => {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'bottom'
-                        },
+                        legend: { position: 'bottom' },
                         tooltip: {
                             callbacks: {
                                 label: function (context) {
@@ -420,6 +420,7 @@ onAuthStateChanged(auth, async (user) => {
             });
         }
     });
+    loadTasks()
 });
 
 
@@ -488,16 +489,39 @@ const tbody = document.querySelector('tbody');
 // ADD THIS LINE — THIS FIXES CANCEL!
 let originalRowHTML = '';  // Stores the row HTML before editing
 
-function formatDueDate(timestamp) {
-    if (!timestamp) return '—';
+function formatDueDate(dateValue) {
+    if (!dateValue) return '—';
     try {
-        const date = timestamp.toDate();
+        let date;
+        
+        // Handle Firebase timestamp
+        if (dateValue.toDate) {
+            date = dateValue.toDate();
+        }
+        // Handle string dates
+        else if (typeof dateValue === 'string') {
+            date = new Date(dateValue);
+        }
+        // Handle Date objects
+        else if (dateValue instanceof Date) {
+            date = dateValue;
+        }
+        // Handle timestamp numbers
+        else if (typeof dateValue === 'number') {
+            date = new Date(dateValue);
+        }
+        
+        if (isNaN(date.getTime())) {
+            return '—';
+        }
+        
         return date.toLocaleDateString('en-GB', {
             day: 'numeric',
             month: 'long',
             year: 'numeric'
         });
     } catch (e) {
+        console.error('Date formatting error:', e);
         return '—';
     }
 }
@@ -523,247 +547,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Load tasks
-const tasksCol = query(collection(db, 'tasks'), orderBy('dueDate'));
-onSnapshot(tasksCol, (snapshot) => {
-    tbody.innerHTML = '';
-    let no = 1;
-    snapshot.docs.forEach(docSnap => {
-        const data = docSnap.data();
-        const row = document.createElement('tr');
-        row.dataset.id = docSnap.id;
-
-        row.innerHTML = `
-            <td>${no++}</td>
-            <td>${escapeHtml(data.taskName || 'Untitled')}</td>
-            <td>
-                <select class="status-select">
-                    <option value="todo" ${data.status === 'todo' ? 'selected' : ''}>Todo</option>
-                    <option value="in-progress" ${data.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
-                    <option value="done" ${data.status === 'done' ? 'selected' : ''}>Done</option>
-                </select>
-            </td>
-            <td>
-                <select class="priority-select">
-                    <option value="high" ${data.priority === 'high' ? 'selected' : ''}>High</option>
-                    <option value="medium" ${data.priority === 'medium' ? 'selected' : ''}>Medium</option>
-                    <option value="low" ${data.priority === 'low' ? 'selected' : ''}>Low</option>
-                </select>
-            </td>
-            <td>${escapeHtml(data.category || '—')}</td>
-            <td>${formatDueDate(data.dueDate)}</td>
-            <td>
-                <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
-            </td>
-            <td>${escapeHtml(data.remark || '—')}</td>
-        `;
-        tbody.appendChild(row);
-    });
-
-    // Optional: Show message if no tasks
-    if (snapshot.empty) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888; padding:30px;">No tasks yet</td></tr>';
-    }
-});
-
-// Click handlers
-tbody.addEventListener('click', async (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-
-    const row = btn.closest('tr');
-    const taskId = row.dataset.id;
-
-    if (btn.classList.contains('delete-btn')) {
-        if (confirm('Delete this task?')) {
-            await deleteDoc(doc(db, 'tasks', taskId));
-        }
-
-    } else if (btn.classList.contains('edit-btn')) {
-        enterEditMode(row);
-
-    } else if (btn.classList.contains('save-btn')) {
-        await saveTask(row, taskId);
-
-    } else if (btn.classList.contains('cancel-btn')) {
-        // NOW THIS WORKS — restores everything perfectly!
-        row.innerHTML = originalRowHTML;
-        row.classList.remove('editing');
-    }
-});
-
-tbody.addEventListener('change', async (e) => {
-    if (e.target.matches('.status-select, .priority-select')) {
-        const row = e.target.closest('tr');
-        const field = e.target.classList.contains('status-select') ? 'status' : 'priority';
-        await updateDoc(doc(db, 'tasks', row.dataset.id), { [field]: e.target.value });
-    }
-});
-
-// EDIT MODE
-function enterEditMode(row) {
-    if (row.classList.contains('editing')) return;
-
-    // SAVE THE ORIGINAL ROW HTML BEFORE CHANGING ANYTHING
-    originalRowHTML = row.innerHTML;
-
-    row.classList.add('editing');
-
-    const currentDisplayDate = row.cells[5].textContent.trim();
-
-    row.cells[1].innerHTML = `<input type="text" class="edit-input" value="${escapeHtml(row.cells[1].textContent)}">`;
-    row.cells[4].innerHTML = `<input type="text" class="edit-input" value="${row.cells[4].textContent === '—' ? '' : row.cells[4].textContent}">`;
-    row.cells[5].innerHTML = `<input type="text" class="edit-input" placeholder="e.g. 27 December 2025" value="${currentDisplayDate === '—' ? '' : currentDisplayDate}">`;
-    row.cells[7].innerHTML = `<input type="text" class="edit-input" value="${row.cells[7].textContent === '—' ? '' : row.cells[7].textContent}">`;
-
-    row.cells[6].innerHTML = `
-        <button class="save-btn"><i class="fa-solid fa-check"></i> Save</button>
-        <button class="cancel-btn"><i class="fa-solid fa-xmark"></i> Cancel</button>
-    `;
-}
-
-// SAVE TASK
-async function saveTask(row, taskId) {
-    const inputs = row.querySelectorAll('.edit-input');
-    const taskName = inputs[0].value.trim();
-    const category = inputs[1].value.trim();
-    const dueDateText = inputs[2].value.trim();
-    const remark = inputs[3].value.trim();
-
-    if (!taskName) {
-        alert('Task Name is required!');
-        return;
-    }
-
-    const updateData = {
-        taskName,
-        category: category || null,
-        remark: remark || null,
-        status: row.querySelector('.status-select').value,
-        priority: row.querySelector('.priority-select').value
-    };
-
-    const parsedDate = parseFlexibleDate(dueDateText);
-    if (dueDateText && !parsedDate) {
-        alert('Please enter a valid date (e.g. 27 December 2025)');
-        return;
-    }
-    updateData.dueDate = parsedDate;
-
-    try {
-        await updateDoc(doc(db, 'tasks', taskId), updateData);
-        row.classList.remove('editing');
-    } catch (error) {
-        alert('Error saving: ' + error.message);
-    }
-}
-
-// // When I login on gmail cat@gmail.com have new data diferent gmail doc@gmail.com
-
-
-
-
-// HTML elements
-const tBody = document.querySelector('tbody');
-const userNameDisplay = document.getElementById('userName'); // Shows email
-const loginBtn = document.getElementById('loginBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-
-
-// Load tasks ONLY for the current logged-in user
-function loadTasksForUser(userEmail) {
-    // This query gets only tasks where email == user's email
-    const q = query(collection(db, 'tasks'), where('email', '==', userEmail));
-
-    onSnapshot(q, (snapshot) => {
-        tbody.innerHTML = '';
-        let no = 1;
-
-        if (snapshot.empty) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px; color:#888;">No tasks yet</td></tr>';
-            return;
-        }
-
-        snapshot.forEach((docSnap) => {
-            const task = docSnap.data();
-            const row = document.createElement('tr');
-            row.dataset.id = docSnap.id;
-
-            row.innerHTML = `
-        <td>${no++}</td>
-        <td>${task.taskName || 'Untitled'}</td>
-        <td>
-          <select class="status-select">
-            <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>Todo</option>
-            <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
-            <option value="done" ${task.status === 'done' ? 'selected' : ''}>Done</option>
-          </select>
-        </td>
-        <td>
-          <select class="priority-select">
-            <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
-            <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
-            <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
-          </select>
-        </td>
-        <td>${task.category || '—'}</td>
-        <td>${formatDueDate(task.dueDate)}</td>
-        <td>
-          <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
-        </td>
-        <td>${task.remark || '—'}</td>
-      `;
-
-            tbody.appendChild(row);
-        });
-    });
-}
-
-// Check login status
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        // User logged in
-        userNameDisplay.textContent = user.email;
-        // Load ONLY this user's tasks
-        loadTasksForUser(user.email);
-
-    } else {
-        // No user
-        userNameDisplay.textContent = 'Guest';
-        logoutBtn.style.display = 'none';
-        loginBtn.style.display = 'inline-block';
-
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;">Please login to see your tasks</td></tr>';
-    }
-});
-
-// Status & Priority change → save to Firebase
-tbody.addEventListener('change', async (e) => {
-    if (e.target.classList.contains('status-select') || e.target.classList.contains('priority-select')) {
-        const row = e.target.closest('tr');
-        const taskId = row.dataset.id;
-        const field = e.target.classList.contains('status-select') ? 'status' : 'priority';
-        const value = e.target.value;
-
-        await updateDoc(doc(db, 'tasks', taskId), { [field]: value });
-    }
-});
-
-// Delete task
-tbody.addEventListener('click', async (e) => {
-    if (e.target.closest('.delete-btn')) {
-        if (confirm('Delete this task?')) {
-            const row = e.target.closest('tr');
-            await deleteDoc(doc(db, 'tasks', row.dataset.id));
-        }
-    }
-});
-// ----------------------------
-// LOAD TASKS FROM FIREBASE
-// ----------------------------
-
+// Load tasks - CONSOLIDATED FUNCTION
 async function loadTasks() {
     const user = auth.currentUser;
     if (!user) return;
@@ -777,16 +561,26 @@ async function loadTasks() {
 
         // Clear existing rows except the header
         tbody.innerHTML = '';
+        let no =1 ;
+        
+        if (querySnapshot.empty) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px; color:#888;">No tasks yet</td></tr>';
+            updateTaskCounts();
+            filterTasks();
+            return;
+        }
+
+
         querySnapshot.forEach((doc, index) => {
             const task = doc.data();
             const row = document.createElement('tr');
+            row.dataset.id = doc.id;
 
             row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${task.taskName}</td>
+                <td>${no++}</td>
+                <td>${escapeHtml(task.taskName || 'Untitled')}</td>
                 <td>
                     <select class="status-select">
-                        <option value="" selected disabled>select here...</option>
                         <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>Todo</option>
                         <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
                         <option value="done" ${task.status === 'done' ? 'selected' : ''}>Done</option>
@@ -794,20 +588,46 @@ async function loadTasks() {
                 </td>
                 <td>
                     <select class="priority-select">
-                        <option value="" selected disabled>select here...</option>
                         <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
                         <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
                         <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
                     </select>
                 </td>
-                <td class="category-cell">${task.category}</td>
-                <td>${task.dueDate}</td>
+                <td>
+                    <select class="category-select">
+                        <option value="">—</option>
+                    </select>
+                </td>
+                <td>${formatDueDate(task.dueDate)}</td>
                 <td>
                     <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                     <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
                 </td>
-                <td>${task.remark || '—'}</td>
+                <td>${escapeHtml(task.remark || '—')}</td>
             `;
+
+            // Populate category dropdown with available categories
+            const categorySelect = row.querySelector('.category-select');
+            const categoriesRef = collection(db, 'categories');
+            const categoriesQuery = query(categoriesRef, where('email', '==', auth.currentUser.email));
+            
+            getDocs(categoriesQuery).then((categoriesSnapshot) => {
+                categoriesSnapshot.forEach((categoryDoc) => {
+                    const categoryData = categoryDoc.data();
+                    if (categoryData.category && 
+                        !categoryData.category.toLowerCase().includes('gmail') && 
+                        categoryData.category.trim() !== '') {
+                        
+                        const option = document.createElement('option');
+                        option.value = categoryData.category;
+                        option.textContent = categoryData.category;
+                        if (task.category === categoryData.category) {
+                            option.selected = true;
+                        }
+                        categorySelect.appendChild(option);
+                    }
+                });
+            });
 
             tbody.appendChild(row);
         });
@@ -823,6 +643,128 @@ async function loadTasks() {
     }
 }
 
+// CONSOLIDATED EVENT HANDLERS FOR TABLE
+tbody.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    const row = btn.closest('tr');
+    const taskId = row.dataset.id;
+
+    if (btn.classList.contains('delete-btn')) {
+        if (confirm('Are you sure you want to delete this task?')) {
+            try {
+                await deleteDoc(doc(db, 'tasks', taskId));
+                // Reload tasks to refresh the table
+                await loadTasks();
+            } catch (error) {
+                console.error('Error deleting task:', error);
+                alert('Failed to delete task. Please try again.');
+            }
+        }
+
+    } else if (btn.classList.contains('edit-btn')) {
+        enterEditMode(row);
+
+
+    } else if (btn.classList.contains('save-btn')) {
+        await saveTask(row, taskId);
+
+    } else if (btn.classList.contains('cancel-btn')) {
+        // Restore the original row HTML
+        row.innerHTML = originalRowHTML;
+        row.classList.remove('editing');
+    }
+});
+
+tbody.addEventListener('change', async (e) => {
+    if (e.target.matches('.status-select, .priority-select, .category-select')) {
+        const row = e.target.closest('tr');
+        const taskId = row.dataset.id;
+        
+        let field;
+        if (e.target.classList.contains('status-select')) {
+            field = 'status';
+        } else if (e.target.classList.contains('priority-select')) {
+            field = 'priority';
+        } else if (e.target.classList.contains('category-select')) {
+            field = 'category';
+        }
+        
+        try {
+            await updateDoc(doc(db, 'tasks', taskId), { [field]: e.target.value });
+            if (field === 'status') {
+                updateTaskCounts(); // Update counts when status changes
+            }
+        } catch (error) {
+            console.error('Error updating task:', error);
+            alert('Failed to update task. Please try again.');
+        }
+    }
+});
+
+// EDIT MODE
+function enterEditMode(row) {
+    if (row.classList.contains('editing')) return;
+
+    // SAVE THE ORIGINAL ROW HTML BEFORE CHANGING ANYTHING
+    originalRowHTML = row.innerHTML;
+
+    row.classList.add('editing');
+
+    const currentDisplayDate = row.cells[5].textContent.trim();
+
+    row.cells[1].innerHTML = `<input type="text" class="edit-input" value="${escapeHtml(row.cells[1].textContent)}">`;
+    row.cells[5].innerHTML = `<input type="text" class="edit-input" placeholder="e.g. 27 December 2025" value="${currentDisplayDate === '—' ? '' : currentDisplayDate}">`;
+    row.cells[7].innerHTML = `<input type="text" class="edit-input" value="${row.cells[7].textContent === '—' ? '' : row.cells[7].textContent}">`;
+
+    row.cells[6].innerHTML = `
+        <button class="save-btn"><i class="fa-solid fa-check"></i> Save</button>
+        <button class="cancel-btn"><i class="fa-solid fa-xmark"></i> Cancel</button>
+    `;
+}
+
+// SAVE TASK
+async function saveTask(row, taskId) {
+    const inputs = row.querySelectorAll('.edit-input');
+    const taskName = inputs[0].value.trim();
+    // const category = inputs[1].value.trim();
+    const dueDateText = inputs[1].value.trim();
+    const remark = inputs[2].value.trim();
+
+    if (!taskName) {
+        alert('Task Name is required!');
+        return;
+    }
+
+    const updateData = {
+        taskName,
+        // category: category || null,
+        category: row.querySelector('.category-select').value,
+        remark: remark || null,
+        status: row.querySelector('.status-select').value,
+        priority: row.querySelector('.priority-select').value
+    };
+
+    const parsedDate = parseFlexibleDate(dueDateText);
+    if (dueDateText && !parsedDate) {
+        alert('Please enter a valid date (e.g. 27 December 2025)');
+        return;
+    }
+    updateData.dueDate = parsedDate;
+
+    try {
+        await updateDoc(doc(db, 'tasks', taskId), updateData);
+        row.classList.remove('editing');
+        // Reload tasks to refresh the table with updated data
+        await loadTasks();
+    } catch (error) {
+        console.error('Error saving task:', error);
+        alert('Failed to save task. Please try again.');
+    }
+}
+
+
 // ----------------------------
 // RENDER ALL CATEGORIES IN SIDEBAR - SMOOTH ANIMATION
 // ----------------------------
@@ -834,29 +776,35 @@ async function renderCategories() {
         const q = query(collection(db, "categories"), where("email", "==", currentUser.email));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc, index) => {
-            const div = document.createElement("div");
-            div.textContent = doc.data().category;
-            div.className = 'category-item';
-            div.style.animationDelay = `${index * 0.1}s`;
+            const categoryData = doc.data();
+            // Filter out gmail categories and only show created categories
+            if (categoryData.category && 
+                !categoryData.category.toLowerCase().includes('gmail') && 
+                categoryData.category.trim() !== '') {
+                const div = document.createElement("div");
+                div.textContent = categoryData.category;
+                div.className = 'category-item';
+                div.style.animationDelay = `${index * 0.1}s`;
 
-            // Add click handler for category filtering
-            div.addEventListener('click', () => {
-                // Remove active class from all category items
-                document.querySelectorAll('.category-item').forEach(item => {
-                    item.classList.remove('active-category');
+                // Add click handler for category filtering
+                div.addEventListener('click', () => {
+                    // Remove active class from all category items
+                    document.querySelectorAll('.category-item').forEach(item => {
+                        item.classList.remove('active-category');
+                    });
+
+                    // Add active class to clicked category
+                    div.classList.add('active-category');
+
+                    // Set the category filter and trigger filtering
+                    const categoryFilter = document.getElementById('categoryFilter');
+                    if (categoryFilter) {
+                        categoryFilter.value = categoryData.category;
+                        categoryFilter.dispatchEvent(new Event('change'));
+                    }
                 });
-
-                // Add active class to clicked category
-                div.classList.add('active-category');
-
-                // Set the category filter and trigger filtering
-                const categoryFilter = document.getElementById('categoryFilter');
-                if (categoryFilter) {
-                    categoryFilter.value = doc.data().category;
-                    categoryFilter.dispatchEvent(new Event('change'));
-                }
-            });
-            smallCategoryDiv.appendChild(div);
+                smallCategoryDiv.appendChild(div);
+            }
         });
     } catch (err) {
         console.error("Error fetching categories:", err);
@@ -947,96 +895,3 @@ setTimeout(function () {
     }
 }, 1000);
 
-
-
-const perfomanceBtn = document.querySelector('.rate');
-const perfomanceSec = document.querySelector('.completed-rate');
-perfomanceBtn.addEventListener('click', () => {
-    perfomanceBtn.classList.add('nav-active')
-    perfomanceSec.style.display = 'block';
-    mainTop.style.display = 'none';
-    mainBottom.style.display = 'none';
-})
-
-// Example tasks
-
-const tasksRef = collection(db, "tasks");
-const q = query(tasksRef, where('email', '==', auth.currentUser.email));
-const querySnapshot = await getDocs(q);
-
-
-
-// Count tasks
-const totalTasks = querySnapshot.length;
-const completedTasks = tasks.filter(t => t.status === "done").length;
-const incompleteTasks = tasks.filter(t => t.status !== "done").length;
-
-// Update cards
-document.getElementById("rate-all-tasks").textContent = totalTasks;
-document.getElementById("rate-completed-tasks").textContent = completedTasks;
-document.getElementById("rate-incomplete-tasks").textContent = incompleteTasks;
-
-// Populate table
-const rateTableBody = document.getElementById("rate-task-table-body");
-
-// Reference buttons
-const btnCompleted = document.querySelector('.rate-completed-btn');
-const btnIncomplete = document.querySelector('.rate-incomplete-btn');
-
-// Function to render tasks in table
-function renderTasks(filteredTasks) {
-    rateTableBody.innerHTML = '';
-    filteredTasks.forEach(task => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-      <td>${task.name}</td>
-      <td class="rate-status-${task.status.toLowerCase()}">${task.status}</td>
-      <td class="rate-category">${task.category}</td>
-      <td class="rate-dueDate">${task.dueDate}</td>
-    `;
-        rateTableBody.appendChild(tr);
-    });
-}
-
-// Function to update active button
-function setActiveButton(btnType) {
-    btnCompleted.classList.remove('rate-btn-active');
-    btnIncomplete.classList.remove('rate-btn-active-incomplete');
-
-    if (btnType === 'completed') btnCompleted.classList.add('rate-btn-active');
-    if (btnType === 'incomplete') btnIncomplete.classList.add('rate-btn-active-incomplete');
-}
-
-// Initial view: show Completed tasks
-renderTasks(querySnapshot.filter(t => t.status === "done"));
-setActiveButton('completed');
-
-// Event listeners
-btnCompleted.addEventListener('click', () => {
-    renderTasks(tasks.filter(t => t.status === "done"));
-    setActiveButton('completed');
-});
-
-btnIncomplete.addEventListener('click', () => {
-    renderTasks(tasks.filter(t => t.status !== "done"));
-    setActiveButton('incomplete');
-});
-
-// Chart.js Pie Chart
-const ctx = document.getElementById('rate-taskChart').getContext('2d');
-new Chart(ctx, {
-    type: 'pie',
-    data: {
-        labels: ['Completed', 'Incomplete'],
-        datasets: [{
-            data: [completedTasks, incompleteTasks],
-            backgroundColor: ['#3b82f6', '#ef4444'],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: { legend: { position: 'bottom' } },
-        maintainAspectRatio: false
-    }
-});
