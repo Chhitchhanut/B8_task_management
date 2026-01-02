@@ -394,7 +394,7 @@ function formatDueDate(timestamp) {
 function parseFlexibleDate(text) {
     if (!text || text.trim() === '' || text === '—') return null;
     const cleaned = text.trim();
-
+    
     const parsed = new Date(cleaned);
     if (!isNaN(parsed)) return parsed;
 
