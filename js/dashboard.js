@@ -335,7 +335,6 @@ taskForm.addEventListener("submit", async (e) => {
         alert("Please log in to create tasks");
         return;
     }
-
     const email = currentUser.email;
     const taskName = document.getElementById("taskName").value;
     const priority = document.getElementById("priority").value;
@@ -343,7 +342,6 @@ taskForm.addEventListener("submit", async (e) => {
     const category = document.getElementById("category").value;
     const dueDate = document.getElementById("dueDate").value;
     const remark = document.getElementById("remark").value;
-
     try {
         await addDoc(collection(db, "tasks"), {
             email,
@@ -550,10 +548,6 @@ async function saveTask(row, taskId) {
 
 // // When I login on gmail cat@gmail.com have new data diferent gmail doc@gmail.com
 
-
-
-
-// HTML elements
 const tBody = document.querySelector('tbody');
 const userNameDisplay = document.getElementById('userName'); // Shows email
 const loginBtn = document.getElementById('loginBtn');
@@ -835,3 +829,4 @@ setTimeout(function () {
         });
     }
 }, 1000);
+
