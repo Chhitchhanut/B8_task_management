@@ -1,0 +1,34 @@
+// Fix for All Tasks click handler - replace the existing handler with this one
+
+// Find and replace the All Tasks click handler in dashboard.js
+// The current handler should be around line 904-909
+
+// OLD CODE (to be replaced):
+
+allTasks.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.querySelectorAll('.icons').forEach(item => { item.classList.remove('nav-active'); }); allTasks.classList.add('nav-active'); categories.forEach(cat => cat.classList.remove('active-category'));
+    rows.forEach(row => row.style.display = '');
+});
+
+
+// NEW CODE (should replace the old one):
+
+allTasks.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.querySelectorAll('.icons').forEach(item => { 
+        item.classList.remove('nav-active'); 
+    }); 
+    allTasks.classList.add('nav-active'); 
+    categories.forEach(cat => cat.classList.remove('active-category'));
+    rows.forEach(row => row.style.display = '');
+    
+    // Show task table and hide performance section
+    mainTop.style.display = 'block';
+    mainBottom.style.display = 'block';
+    document.querySelector('.completed-rate').style.display = 'none';
+    taskForm.style.display = 'none';
+});
+

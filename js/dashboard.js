@@ -183,6 +183,12 @@ doneCategory.addEventListener('click', async (e) => {
 // DOWN CATEGORY TOGGLE - SMOOTH ANIMATION
 // ----------------------------
 downIcon.addEventListener('click', () => {
+    // Remove active class from all navigation items and add to category
+    document.querySelectorAll('.icons').forEach(item => {
+        item.classList.remove('nav-active');
+    });
+    document.querySelector('.category').classList.add('nav-active');
+    
     const isHidden = allCategory.style.display === 'none' || allCategory.style.display === '';
 
     if (isHidden) {
@@ -204,6 +210,9 @@ downIcon.addEventListener('click', () => {
             }
         }, 400);
     }
+    
+    // Don't reset the filter - keep the current category selection active
+    // This maintains the Library (or other category) filter when toggling the dropdown
 });
 
 // ----------------------------
@@ -383,10 +392,16 @@ onAuthStateChanged(auth, async (user) => {
     const perfomanceSec = document.querySelector('.completed-rate');
 
     perfomanceBtn.addEventListener('click', () => {
+        // Remove active class from all navigation items
+        document.querySelectorAll('.icons').forEach(item => {
+            item.classList.remove('nav-active');
+        });
+        // Add active class to performance button
         perfomanceBtn.classList.add('nav-active');
         perfomanceSec.style.display = 'block';
         mainTop.style.display = 'none';
         mainBottom.style.display = 'none';
+        taskForm.style.display = 'none';
 
         // Only create chart once
         if (!rateChart) {
@@ -428,8 +443,8 @@ onAuthStateChanged(auth, async (user) => {
 // ----------------------------
 // TASK MODAL LOGIC
 // ----------------------------
-showCreateTaskBtn.addEventListener('click', () => {
-    mainTop.style.display = 'none';
+showCreateTaskBtn.addEventListener('click', () => { // Remove active class from all navigation items
+    mainTop.style.display = 'none'; document.querySelectorAll('.icons').forEach(item => { item.classList.remove('nav-active'); }); showCreateTaskBtn.classList.add('nav-active');
     mainBottom.style.display = 'none';
     taskForm.style.display = 'block';
     perfomanceSec.style.display = 'none';
@@ -826,7 +841,7 @@ setTimeout(function () {
             e.stopPropagation();
 
             // Remove active from all
-            categories.forEach(cat => cat.classList.remove('active-category'));
+            document.querySelectorAll('.icons').forEach(item => { item.classList.remove('nav-active'); }); allTasks.classList.add('nav-active'); categories.forEach(cat => cat.classList.remove('active-category'));
             // Add active to clicked
             this.classList.add('active-category');
             // Get the category name
@@ -848,7 +863,7 @@ setTimeout(function () {
         allTasks.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            categories.forEach(cat => cat.classList.remove('active-category'));
+            document.querySelectorAll('.icons').forEach(item => { item.classList.remove('nav-active'); }); allTasks.classList.add('nav-active'); categories.forEach(cat => cat.classList.remove('active-category'));
             rows.forEach(row => row.style.display = '');
         });
     }
@@ -867,7 +882,7 @@ setTimeout(function () {
             e.stopPropagation();
 
             // Remove active from all
-            categories.forEach(cat => cat.classList.remove('active-category'));
+            document.querySelectorAll('.icons').forEach(item => { item.classList.remove('nav-active'); }); allTasks.classList.add('nav-active'); categories.forEach(cat => cat.classList.remove('active-category'));
             // Add active to clicked
             this.classList.add('active-category');
             // Get the category name
@@ -889,7 +904,7 @@ setTimeout(function () {
         allTasks.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            categories.forEach(cat => cat.classList.remove('active-category'));
+            document.querySelectorAll('.icons').forEach(item => { item.classList.remove('nav-active'); }); allTasks.classList.add('nav-active'); categories.forEach(cat => cat.classList.remove('active-category'));
             rows.forEach(row => row.style.display = '');
         });
     }
