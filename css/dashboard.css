@@ -457,34 +457,62 @@ tr:hover {
 
 /* Select */
 
+.status-select, .priority-select, .category-select {
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    padding: 4px 12px;
+    text-align: center;
+    color: #333333;
+    transition: all 0.2s ease-in-out;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.status-select:hover, .priority-select:hover, .category-select:hover {
+    border-color: #c0c0c0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.status-select:focus, .priority-select:focus, .category-select:focus {
+    border-color: #a0a0a0;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.status-select option, .priority-select option, .category-select option {
+    background-color: #ffffff;
+    color: #333333;
+}
+
 .status-select {
-    border: none;
-    font-size: 14px;
-    cursor: pointer;
-    outline: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    text-align: center;
+    min-width: 90px;
 }
-.priority-select{
-    cursor: pointer;
-    border: none;
-    outline: none;
-    font-size: 14px;
-    padding: 4px 24px;
-    border-radius: 4px;
-    text-align: center;
+
+.priority-select {
+    min-width: 90px;
 }
+
+.category-select {
+    min-width: 120px;
+}
+
 .status-select:has(option[value="todo"]:checked) {
-    background: #e1c1d4c6;
+    background-color: #f44336; /* Red */
+    color: white;
 }
 
 .status-select:has(option[value="in-progress"]:checked) {
-    background: #69a9e9;
+    background-color: #2196f3; /* Blue */
+    color: white;
 }
 
 .status-select:has(option[value="done"]:checked) {
-    background: #6bd895;
+    background-color: #4CAF50; /* Green */
+    color: white;
 }
 
 .select {
