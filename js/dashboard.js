@@ -1,16 +1,9 @@
 // ----------------------------
 // IMPORTS
 // ----------------------------
-import { auth, db } from './firebase-config.js';
-import { collection, addDoc, serverTimestamp, getDocs, query, where, onSnapshot, doc, updateDoc, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-import {
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-
+import { db, auth } from './firebase-config.js';
+import { collection, addDoc, getDocs, query, where, onSnapshot, doc, updateDoc, deleteDoc, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
 // ----------------------------
 // DOM ELEMENTS
@@ -51,6 +44,20 @@ const searchInput = document.getElementById('categorySearch');
 const searchBtn = document.getElementById('searchBtn');
 const tableBody = document.querySelector('table tbody');
 const tableRows = document.querySelectorAll('tbody tr');
+
+// Current user tracking
+let currentUser = null;
+
+// Check authentication state
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        currentUser = user;
+        renderCategories();
+    } else {
+        // Redirect to login if not authenticated
+        window.location.href = "index.html";
+    }
+});
 
 // ----------------------------
 // MENU BUTTON LOGIC
@@ -109,9 +116,14 @@ doneCategory.addEventListener('click', async (e) => {
     }
     
     try {
+        if (!currentUser) {
+            alert("Please log in to create categories");
+            return;
+        }
+
         await addDoc(collection(db, "categories"), {
             category: newCategoryName,
-            email: usernameTag.textContent
+            email: currentUser.email
         });
 
         // Create new category element with smooth animation
@@ -278,6 +290,26 @@ onAuthStateChanged(auth, async (user) => {
     const q = query(categoriesRef, where('email', '==', user.email));
 
     try {
+        // Clear existing options first
+        categorySelect.innerHTML = '';
+        categoryFilter.innerHTML = '';
+        
+        // Add placeholder option for task creation dropdown
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = '-- Select Category --';
+        placeholderOption.selected = true;
+        placeholderOption.disabled = true;
+        categorySelect.appendChild(placeholderOption);
+        
+        // Add placeholder option for filter dropdown
+        const filterPlaceholderOption = document.createElement('option');
+        filterPlaceholderOption.value = '';
+        filterPlaceholderOption.textContent = 'Filter by Category';
+        filterPlaceholderOption.selected = true;
+        categoryFilter.appendChild(filterPlaceholderOption);
+        
+        // Add user's categories to both dropdowns
         const querySnapshot = await getDocs(q);
         
         // Clear existing options first
@@ -331,7 +363,12 @@ createTaskBtnClose.addEventListener('click', () => {
 
 taskForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = usernameTag.textContent;
+    if (!currentUser) {
+        alert("Please log in to create tasks");
+        return;
+    }
+
+    const email = currentUser.email;
     const taskName = document.getElementById("taskName").value;
     const priority = document.getElementById("priority").value;
     const status = 'todo';
@@ -653,8 +690,11 @@ async function saveTask(row, taskId) {
 // ----------------------------
 async function renderCategories() {
     smallCategoryDiv.innerHTML = "";
+    if (!currentUser) return;
+
     try {
-        const querySnapshot = await getDocs(collection(db, "categories"));
+        const q = query(collection(db, "categories"), where("email", "==", currentUser.email));
+        const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc, index) => {
             const categoryData = doc.data();
             // Filter out gmail categories and only show created categories
@@ -690,4 +730,87 @@ async function renderCategories() {
         console.error("Error fetching categories:", err);
     }
 }
-renderCategories();
+
+
+// ======================================================
+
+// Wait for page to be ready
+setTimeout(function () {
+    // Get all category items
+    const categories = document.querySelectorAll('.category-item');
+    const rows = document.querySelectorAll('tbody tr');
+    // Add click handlers to each category
+    categories.forEach((category, index) => {
+        category.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Remove active from all
+            categories.forEach(cat => cat.classList.remove('active-category'));
+            // Add active to clicked
+            this.classList.add('active-category');
+            // Get the category name
+            const categoryName = this.textContent.trim();
+            // Filter rows
+            rows.forEach((row, rowIndex) => {
+                const rowCategory = row.querySelector('.category-cell').textContent.trim();
+                if (rowCategory === categoryName) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+    // All Tasks click handler
+    const allTasks = document.querySelector('.all_task');
+    if (allTasks) {
+        allTasks.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            categories.forEach(cat => cat.classList.remove('active-category'));
+            rows.forEach(row => row.style.display = '');
+        });
+    }
+}, 1000);
+
+//================== filter caregory ========================
+
+setTimeout(function () {
+    // Get all category items
+    const categories = document.querySelectorAll('.category-item');
+    const rows = document.querySelectorAll('tbody tr');
+    // Add click handlers to each category
+    categories.forEach((category, index) => {
+        category.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Remove active from all
+            categories.forEach(cat => cat.classList.remove('active-category'));
+            // Add active to clicked
+            this.classList.add('active-category');
+            // Get the category name
+            const categoryName = this.textContent.trim();
+            // Filter rows
+            rows.forEach((row, rowIndex) => {
+                const rowCategory = row.querySelector('.category-cell').textContent.trim();
+                if (rowCategory === categoryName) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+    // All Tasks click handler
+    const allTasks = document.querySelector('.all_task');
+    if (allTasks) {
+        allTasks.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            categories.forEach(cat => cat.classList.remove('active-category'));
+            rows.forEach(row => row.style.display = '');
+        });
+    }
+}, 1000);

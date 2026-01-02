@@ -110,7 +110,7 @@ body::before {
 }
 .nav-contain.compact {
     width: 70px;
-    padding-left: 0;
+    padding-left: 12px;
 }
 .nav-contain.compact p {
     display: none;
