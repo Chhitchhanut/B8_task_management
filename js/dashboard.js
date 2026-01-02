@@ -1,16 +1,9 @@
 // ----------------------------
 // IMPORTS
 // ----------------------------
-import { auth, db } from './firebase-config.js';
-import { collection, addDoc, serverTimestamp, getDocs, query, where, onSnapshot, doc, updateDoc, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-import {
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-
+import { db, auth } from './firebase-config.js';
+import { collection, addDoc, getDocs, query, where, onSnapshot, doc, updateDoc, deleteDoc, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
 // ----------------------------
 // DOM ELEMENTS
@@ -51,6 +44,20 @@ const searchInput = document.getElementById('categorySearch');
 const searchBtn = document.getElementById('searchBtn');
 const tableBody = document.querySelector('table tbody');
 const tableRows = document.querySelectorAll('tbody tr');
+
+// Current user tracking
+let currentUser = null;
+
+// Check authentication state
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        currentUser = user;
+        renderCategories();
+    } else {
+        // Redirect to login if not authenticated
+        window.location.href = "index.html";
+    }
+});
 
 // ----------------------------
 // MENU BUTTON LOGIC
@@ -101,9 +108,14 @@ doneCategory.addEventListener('click', async (e) => {
         return;
     }
     try {
+        if (!currentUser) {
+            alert("Please log in to create categories");
+            return;
+        }
+
         await addDoc(collection(db, "categories"), {
             category: newCategoryName,
-            email: usernameTag.textContent
+            email: currentUser.email
         });
 
         // Create new category element with smooth animation
@@ -257,13 +269,41 @@ onAuthStateChanged(auth, async (user) => {
     const q = query(categoriesRef, where('email', '==', user.email));
 
     try {
+        // Clear existing options first
+        categorySelect.innerHTML = '';
+        categoryFilter.innerHTML = '';
+        
+        // Add placeholder option for task creation dropdown
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = '-- Select Category --';
+        placeholderOption.selected = true;
+        placeholderOption.disabled = true;
+        categorySelect.appendChild(placeholderOption);
+        
+        // Add placeholder option for filter dropdown
+        const filterPlaceholderOption = document.createElement('option');
+        filterPlaceholderOption.value = '';
+        filterPlaceholderOption.textContent = 'Filter by Category';
+        filterPlaceholderOption.selected = true;
+        categoryFilter.appendChild(filterPlaceholderOption);
+        
+        // Add user's categories to both dropdowns
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
             const categoryData = doc.data();
+            
+            // Add to task creation dropdown
             const option = document.createElement('option');
             option.value = categoryData.category;
             option.textContent = categoryData.category;
             categorySelect.appendChild(option);
+            
+            // Add to filter dropdown
+            const filterOption = document.createElement('option');
+            filterOption.value = categoryData.category;
+            filterOption.textContent = categoryData.category;
+            categoryFilter.appendChild(filterOption);
         });
         console.log('Categories loaded:', querySnapshot.size);
     } catch (err) {
@@ -291,7 +331,12 @@ createTaskBtnClose.addEventListener('click', () => {
 
 taskForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = usernameTag.textContent;
+    if (!currentUser) {
+        alert("Please log in to create tasks");
+        return;
+    }
+
+    const email = currentUser.email;
     const taskName = document.getElementById("taskName").value;
     const priority = document.getElementById("priority").value;
     const status = 'todo';
@@ -523,26 +568,24 @@ const logoutBtn = document.getElementById('logoutBtn');
 
 // Load tasks ONLY for the current logged-in user
 function loadTasksForUser(userEmail) {
-  // This query gets only tasks where email == user's email
-  const q = query(collection(db, 'tasks'), where('email', '==', userEmail));
+    // This query gets only tasks where email == user's email
+    const q = query(collection(db, 'tasks'), where('email', '==', userEmail));
 
-  onSnapshot(q, (snapshot) => {
-    tbody.innerHTML = '';
-    let no = 1;
+    onSnapshot(q, (snapshot) => {
+        tbody.innerHTML = '';
+        let no = 1;
 
-    if (snapshot.empty) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px; color:#888;">No tasks yet</td></tr>';
-      return;
-    }
+        if (snapshot.empty) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px; color:#888;">No tasks yet</td></tr>';
+            return;
+        }
 
-    snapshot.forEach((docSnap) => {
-      const task = docSnap.data();
-      const row = document.createElement('tr');
-      row.dataset.id = docSnap.id;
+        snapshot.forEach((docSnap) => {
+            const task = docSnap.data();
+            const row = document.createElement('tr');
+            row.dataset.id = docSnap.id;
 
-
-
-      row.innerHTML = `
+            row.innerHTML = `
         <td>${no++}</td>
         <td>${task.taskName || 'Untitled'}</td>
         <td>
@@ -568,57 +611,51 @@ function loadTasksForUser(userEmail) {
         <td>${task.remark || '—'}</td>
       `;
 
-      tbody.appendChild(row);
+            tbody.appendChild(row);
+        });
     });
-  });
 }
 
 // Check login status
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User logged in
-    userNameDisplay.textContent = user.email; 
-    // Load ONLY this user's tasks
-    loadTasksForUser(user.email);
+    if (user) {
+        // User logged in
+        userNameDisplay.textContent = user.email;
+        // Load ONLY this user's tasks
+        loadTasksForUser(user.email);
 
-  } else {
-    // No user
-    userNameDisplay.textContent = 'Guest';
-    logoutBtn.style.display = 'none';
-    loginBtn.style.display = 'inline-block';
+    } else {
+        // No user
+        userNameDisplay.textContent = 'Guest';
+        logoutBtn.style.display = 'none';
+        loginBtn.style.display = 'inline-block';
 
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;">Please login to see your tasks</td></tr>';
-  }
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;">Please login to see your tasks</td></tr>';
+    }
 });
-
-
-
-
 
 // Status & Priority change → save to Firebase
 tbody.addEventListener('change', async (e) => {
-  if (e.target.classList.contains('status-select') || e.target.classList.contains('priority-select')) {
-    const row = e.target.closest('tr');
-    const taskId = row.dataset.id;
-    const field = e.target.classList.contains('status-select') ? 'status' : 'priority';
-    const value = e.target.value;
+    if (e.target.classList.contains('status-select') || e.target.classList.contains('priority-select')) {
+        const row = e.target.closest('tr');
+        const taskId = row.dataset.id;
+        const field = e.target.classList.contains('status-select') ? 'status' : 'priority';
+        const value = e.target.value;
 
-    await updateDoc(doc(db, 'tasks', taskId), { [field]: value });
-  }
+        await updateDoc(doc(db, 'tasks', taskId), { [field]: value });
+    }
 });
 
 
 // Delete task
 tbody.addEventListener('click', async (e) => {
-  if (e.target.closest('.delete-btn')) {
-    if (confirm('Delete this task?')) {
-      const row = e.target.closest('tr');
-      await deleteDoc(doc(db, 'tasks', row.dataset.id));
+    if (e.target.closest('.delete-btn')) {
+        if (confirm('Delete this task?')) {
+            const row = e.target.closest('tr');
+            await deleteDoc(doc(db, 'tasks', row.dataset.id));
+        }
     }
-  }
 });
-
-
 // ----------------------------
 // LOAD TASKS FROM FIREBASE
 // ----------------------------
@@ -682,15 +719,16 @@ async function loadTasks() {
     }
 }
 
-
-
 // ----------------------------
 // RENDER ALL CATEGORIES IN SIDEBAR - SMOOTH ANIMATION
 // ----------------------------
 async function renderCategories() {
     smallCategoryDiv.innerHTML = "";
+    if (!currentUser) return;
+
     try {
-        const querySnapshot = await getDocs(collection(db, "categories"));
+        const q = query(collection(db, "categories"), where("email", "==", currentUser.email));
+        const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc, index) => {
             const div = document.createElement("div");
             div.textContent = doc.data().category;
@@ -720,4 +758,87 @@ async function renderCategories() {
         console.error("Error fetching categories:", err);
     }
 }
-renderCategories();
+
+
+// ======================================================
+
+// Wait for page to be ready
+setTimeout(function () {
+    // Get all category items
+    const categories = document.querySelectorAll('.category-item');
+    const rows = document.querySelectorAll('tbody tr');
+    // Add click handlers to each category
+    categories.forEach((category, index) => {
+        category.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Remove active from all
+            categories.forEach(cat => cat.classList.remove('active-category'));
+            // Add active to clicked
+            this.classList.add('active-category');
+            // Get the category name
+            const categoryName = this.textContent.trim();
+            // Filter rows
+            rows.forEach((row, rowIndex) => {
+                const rowCategory = row.querySelector('.category-cell').textContent.trim();
+                if (rowCategory === categoryName) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+    // All Tasks click handler
+    const allTasks = document.querySelector('.all_task');
+    if (allTasks) {
+        allTasks.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            categories.forEach(cat => cat.classList.remove('active-category'));
+            rows.forEach(row => row.style.display = '');
+        });
+    }
+}, 1000);
+
+//================== filter caregory ========================
+
+setTimeout(function () {
+    // Get all category items
+    const categories = document.querySelectorAll('.category-item');
+    const rows = document.querySelectorAll('tbody tr');
+    // Add click handlers to each category
+    categories.forEach((category, index) => {
+        category.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Remove active from all
+            categories.forEach(cat => cat.classList.remove('active-category'));
+            // Add active to clicked
+            this.classList.add('active-category');
+            // Get the category name
+            const categoryName = this.textContent.trim();
+            // Filter rows
+            rows.forEach((row, rowIndex) => {
+                const rowCategory = row.querySelector('.category-cell').textContent.trim();
+                if (rowCategory === categoryName) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+    // All Tasks click handler
+    const allTasks = document.querySelector('.all_task');
+    if (allTasks) {
+        allTasks.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            categories.forEach(cat => cat.classList.remove('active-category'));
+            rows.forEach(row => row.style.display = '');
+        });
+    }
+}, 1000);
