@@ -427,7 +427,249 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+<<<<<<< HEAD
 // Load tasks - CONSOLIDATED FUNCTION
+=======
+// Load tasks
+const tasksCol = query(collection(db, 'tasks'), orderBy('dueDate'));
+onSnapshot(tasksCol, (snapshot) => {
+    tbody.innerHTML = '';
+    let no = 1;
+    snapshot.docs.forEach(docSnap => {
+        const data = docSnap.data();
+        const row = document.createElement('tr');
+        row.dataset.id = docSnap.id;
+
+        row.innerHTML = `
+            <td>${no++}</td>
+            <td>${escapeHtml(data.taskName || 'Untitled')}</td>
+            <td>
+                <select class="status-select">
+                    <option value="todo" ${data.status === 'todo' ? 'selected' : ''}>Todo</option>
+                    <option value="in-progress" ${data.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+                    <option value="done" ${data.status === 'done' ? 'selected' : ''}>Done</option>
+                </select>
+            </td>
+            <td>
+                <select class="priority-select">
+                    <option value="high" ${data.priority === 'high' ? 'selected' : ''}>High</option>
+                    <option value="medium" ${data.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                    <option value="low" ${data.priority === 'low' ? 'selected' : ''}>Low</option>
+                </select>
+            </td>
+            <td>${escapeHtml(data.category || '—')}</td>
+            <td>${formatDueDate(data.dueDate)}</td>
+            <td>
+                <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
+            </td>
+            <td>${escapeHtml(data.remark || '—')}</td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // Optional: Show message if no tasks
+    if (snapshot.empty) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#888; padding:30px;">No tasks yet</td></tr>';
+    }
+});
+
+// Click handlers
+tbody.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    const row = btn.closest('tr');
+    const taskId = row.dataset.id;
+
+    if (btn.classList.contains('delete-btn')) {
+        if (confirm('Delete this task?')) {
+            await deleteDoc(doc(db, 'tasks', taskId));
+        }
+
+    } else if (btn.classList.contains('edit-btn')) {
+        enterEditMode(row);
+
+    } else if (btn.classList.contains('save-btn')) {
+        await saveTask(row, taskId);
+
+    } else if (btn.classList.contains('cancel-btn')) {
+        // NOW THIS WORKS — restores everything perfectly!
+        row.innerHTML = originalRowHTML;
+        row.classList.remove('editing');
+    }
+});
+
+tbody.addEventListener('change', async (e) => {
+    if (e.target.matches('.status-select, .priority-select')) {
+        const row = e.target.closest('tr');
+        const field = e.target.classList.contains('status-select') ? 'status' : 'priority';
+        await updateDoc(doc(db, 'tasks', row.dataset.id), { [field]: e.target.value });
+    }
+});
+
+// EDIT MODE
+function enterEditMode(row) {
+    if (row.classList.contains('editing')) return;
+
+    // SAVE THE ORIGINAL ROW HTML BEFORE CHANGING ANYTHING
+    originalRowHTML = row.innerHTML;
+
+    row.classList.add('editing');
+
+    const currentDisplayDate = row.cells[5].textContent.trim();
+
+    row.cells[1].innerHTML = `<input type="text" class="edit-input" value="${escapeHtml(row.cells[1].textContent)}">`;
+    row.cells[4].innerHTML = `<input type="text" class="edit-input" value="${row.cells[4].textContent === '—' ? '' : row.cells[4].textContent}">`;
+    row.cells[5].innerHTML = `<input type="text" class="edit-input" placeholder="e.g. 27 December 2025" value="${currentDisplayDate === '—' ? '' : currentDisplayDate}">`;
+    row.cells[7].innerHTML = `<input type="text" class="edit-input" value="${row.cells[7].textContent === '—' ? '' : row.cells[7].textContent}">`;
+
+    row.cells[6].innerHTML = `
+        <button class="save-btn"><i class="fa-solid fa-check"></i> Save</button>
+        <button class="cancel-btn"><i class="fa-solid fa-xmark"></i> Cancel</button>
+    `;
+}
+
+// SAVE TASK
+async function saveTask(row, taskId) {
+    const inputs = row.querySelectorAll('.edit-input');
+    const taskName = inputs[0].value.trim();
+    const category = inputs[1].value.trim();
+    const dueDateText = inputs[2].value.trim();
+    const remark = inputs[3].value.trim();
+
+    if (!taskName) {
+        alert('Task Name is required!');
+        return;
+    }
+
+    const updateData = {
+        taskName,
+        category: category || null,
+        remark: remark || null,
+        status: row.querySelector('.status-select').value,
+        priority: row.querySelector('.priority-select').value
+    };
+
+    const parsedDate = parseFlexibleDate(dueDateText);
+    if (dueDateText && !parsedDate) {
+        alert('Please enter a valid date (e.g. 27 December 2025)');
+        return;
+    }
+    updateData.dueDate = parsedDate;
+
+    try {
+        await updateDoc(doc(db, 'tasks', taskId), updateData);
+        row.classList.remove('editing');
+    } catch (error) {
+        alert('Error saving: ' + error.message);
+    }
+}
+
+// // When I login on gmail cat@gmail.com have new data diferent gmail doc@gmail.com
+
+// HTML elements
+const tBody = document.querySelector('tbody');
+const userNameDisplay = document.getElementById('userName'); // Shows email
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+
+
+// Load tasks ONLY for the current logged-in user
+function loadTasksForUser(userEmail) {
+  // This query gets only tasks where email == user's email
+  const q = query(collection(db, 'tasks'), where('email', '==', userEmail));
+
+  onSnapshot(q, (snapshot) => {
+    tbody.innerHTML = '';
+    let no = 1;
+
+    if (snapshot.empty) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px; color:#888;">No tasks yet</td></tr>';
+      return;
+    }
+
+    snapshot.forEach((docSnap) => {
+      const task = docSnap.data();
+      const row = document.createElement('tr');
+      row.dataset.id = docSnap.id;
+
+      row.innerHTML = `
+        <td>${no++}</td>
+        <td>${task.taskName || 'Untitled'}</td>
+        <td>
+          <select class="status-select">
+            <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>Todo</option>
+            <option value="in-progress" ${task.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+            <option value="done" ${task.status === 'done' ? 'selected' : ''}>Done</option>
+          </select>
+        </td>
+        <td>
+          <select class="priority-select">
+            <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
+            <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
+            <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
+          </select>
+        </td>
+        <td>${task.category || '—'}</td>
+        <td>${formatDueDate(task.dueDate)}</td>
+        <td>
+          <button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+            <button class="delete-btn"><i class="fa-solid fa-trash"></i> Delete</button>
+        </td>
+        <td>${task.remark || '—'}</td>
+      `;
+
+      tbody.appendChild(row);
+    });
+  });
+}
+
+// Check login status
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User logged in
+    userNameDisplay.textContent = user.email; 
+    // Load ONLY this user's tasks
+    loadTasksForUser(user.email);
+
+  } else {
+    // No user
+    userNameDisplay.textContent = 'Guest';
+    logoutBtn.style.display = 'none';
+    loginBtn.style.display = 'inline-block';
+
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;">Please login to see your tasks</td></tr>';
+  }
+});
+
+// Status & Priority change → save to Firebase
+tbody.addEventListener('change', async (e) => {
+  if (e.target.classList.contains('status-select') || e.target.classList.contains('priority-select')) {
+    const row = e.target.closest('tr');
+    const taskId = row.dataset.id;
+    const field = e.target.classList.contains('status-select') ? 'status' : 'priority';
+    const value = e.target.value;
+
+    await updateDoc(doc(db, 'tasks', taskId), { [field]: value });
+  }
+});
+
+// Delete task
+tbody.addEventListener('click', async (e) => {
+  if (e.target.closest('.delete-btn')) {
+    if (confirm('Delete this task?')) {
+      const row = e.target.closest('tr');
+      await deleteDoc(doc(db, 'tasks', row.dataset.id));
+    }
+  }
+});
+
+// ----------------------------
+// LOAD TASKS FROM FIREBASE
+// ----------------------------
+
+>>>>>>> c53985f55b631915f7c0fcb7c38fe4f42183b769
 async function loadTasks() {
     const user = auth.currentUser;
     if (!user) return;
@@ -691,3 +933,8 @@ async function renderCategories() {
     }
 }
 renderCategories();
+
+
+// ----------------------------------------------
+// REMINDER
+// ----------------------------------------------
