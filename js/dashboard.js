@@ -505,9 +505,6 @@ async function saveTask(row, taskId) {
 
 // // When I login on gmail cat@gmail.com have new data diferent gmail doc@gmail.com
 
-
-
-
 // HTML elements
 const tBody = document.querySelector('tbody');
 const userNameDisplay = document.getElementById('userName'); // Shows email
@@ -582,10 +579,6 @@ onAuthStateChanged(auth, (user) => {
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:50px;">Please login to see your tasks</td></tr>';
   }
 });
-
-
-
-
 
 // Status & Priority change → save to Firebase
 tbody.addEventListener('change', async (e) => {
@@ -711,3 +704,8 @@ async function renderCategories() {
     }
 }
 renderCategories();
+
+
+// ----------------------------------------------
+// REMINDER
+// ----------------------------------------------
