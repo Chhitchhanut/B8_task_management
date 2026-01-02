@@ -269,13 +269,41 @@ onAuthStateChanged(auth, async (user) => {
     const q = query(categoriesRef, where('email', '==', user.email));
 
     try {
+        // Clear existing options first
+        categorySelect.innerHTML = '';
+        categoryFilter.innerHTML = '';
+        
+        // Add placeholder option for task creation dropdown
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = '-- Select Category --';
+        placeholderOption.selected = true;
+        placeholderOption.disabled = true;
+        categorySelect.appendChild(placeholderOption);
+        
+        // Add placeholder option for filter dropdown
+        const filterPlaceholderOption = document.createElement('option');
+        filterPlaceholderOption.value = '';
+        filterPlaceholderOption.textContent = 'Filter by Category';
+        filterPlaceholderOption.selected = true;
+        categoryFilter.appendChild(filterPlaceholderOption);
+        
+        // Add user's categories to both dropdowns
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
             const categoryData = doc.data();
+            
+            // Add to task creation dropdown
             const option = document.createElement('option');
             option.value = categoryData.category;
             option.textContent = categoryData.category;
             categorySelect.appendChild(option);
+            
+            // Add to filter dropdown
+            const filterOption = document.createElement('option');
+            filterOption.value = categoryData.category;
+            filterOption.textContent = categoryData.category;
+            categoryFilter.appendChild(filterOption);
         });
         console.log('Categories loaded:', querySnapshot.size);
     } catch (err) {
@@ -600,10 +628,6 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-
-
-
-
 // Status & Priority change → save to Firebase
 tbody.addEventListener('change', async (e) => {
     if (e.target.classList.contains('status-select') || e.target.classList.contains('priority-select')) {
@@ -625,7 +649,6 @@ tbody.addEventListener('click', async (e) => {
         }
     }
 });
-
 // ----------------------------
 // LOAD TASKS FROM FIREBASE
 // ----------------------------
@@ -689,8 +712,6 @@ async function loadTasks() {
     }
 }
 
-
-
 // ----------------------------
 // RENDER ALL CATEGORIES IN SIDEBAR - SMOOTH ANIMATION
 // ----------------------------
@@ -736,13 +757,11 @@ async function renderCategories() {
 
 // Wait for page to be ready
 setTimeout(function () {
-
     // Get all category items
     const categories = document.querySelectorAll('.category-item');
     const rows = document.querySelectorAll('tbody tr');
     // Add click handlers to each category
     categories.forEach((category, index) => {
-
         category.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -774,6 +793,45 @@ setTimeout(function () {
             rows.forEach(row => row.style.display = '');
         });
     }
+}, 1000);
 
-    console.log('Category filtering setup complete!');
+//================== filter caregory ========================
+
+setTimeout(function () {
+    // Get all category items
+    const categories = document.querySelectorAll('.category-item');
+    const rows = document.querySelectorAll('tbody tr');
+    // Add click handlers to each category
+    categories.forEach((category, index) => {
+        category.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Remove active from all
+            categories.forEach(cat => cat.classList.remove('active-category'));
+            // Add active to clicked
+            this.classList.add('active-category');
+            // Get the category name
+            const categoryName = this.textContent.trim();
+            // Filter rows
+            rows.forEach((row, rowIndex) => {
+                const rowCategory = row.querySelector('.category-cell').textContent.trim();
+                if (rowCategory === categoryName) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+    // All Tasks click handler
+    const allTasks = document.querySelector('.all_task');
+    if (allTasks) {
+        allTasks.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            categories.forEach(cat => cat.classList.remove('active-category'));
+            rows.forEach(row => row.style.display = '');
+        });
+    }
 }, 1000);
