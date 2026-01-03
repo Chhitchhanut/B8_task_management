@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login & Signup</title>
     <link rel="stylesheet" href="css/login-signup.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -14,6 +15,7 @@
             <div class="input-group">
                 <label>Email</label>
                 <input type="email" placeholder="Enter your email" name="email" required>
+                <span class="error-message">Please enter a valid email</span>
             </div>
             <div class="input-group">
                 <label>Password</label>
@@ -21,6 +23,7 @@
                     <input type="password" placeholder="Enter your password" name="password" required>
                     <i class="bx bx-hide password-toggle" data-target="login"></i>
                 </div>
+                <span class="error-message">Password must be at least 6 characters</span>
             </div>
             <button type="submit">Login</button>
         </form>
@@ -34,14 +37,17 @@
             <div class="input-group">
                 <label>Full Name</label>
                 <input type="text" placeholder="Full Name" name="fullName" required>
+                <span class="error-message">Please enter your full name</span>
             </div>
             <div class="input-group">
                 <label>Username</label>
                 <input type="text" placeholder="Username" name="username" required>
+                <span class="error-message">Username must be at least 3 characters</span>
             </div>
             <div class="input-group">
                 <label>Email</label>
                 <input type="email" placeholder="Email" name="email" required>
+                <span class="error-message">Please enter a valid email</span>
             </div>
             <div class="input-group">
                 <label>Password</label>
@@ -49,6 +55,7 @@
                     <input type="password" placeholder="Password" name="password" required>
                     <i class="bx bx-hide password-toggle" data-target="signup"></i>
                 </div>
+                <span class="error-message">Password must be at least 6 characters</span>
             </div>
             <button type="submit">Sign Up</button>
         </form>

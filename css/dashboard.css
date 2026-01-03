@@ -898,6 +898,164 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     color: #bfbfbf;
 }
 /* Responsive design */
+@media (max-width: 1024px) {
+    .main-container {
+        flex-direction: column;
+    }
+    
+    .nav-contain {
+        width: 100%;
+        height: auto;
+        position: relative;
+        order: 2;
+        transform: translateX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .nav-contain.mobile-hidden {
+        transform: translateX(-100%);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        height: 100vh;
+        background: var(--bg-secondary);
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .nav-contain.mobile-visible {
+        transform: translateX(0);
+    }
+    
+    .main-content-container {
+        order: 1;
+        margin-left: 0;
+    }
+    
+    .nav-contain ul {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        padding: 20px 10px;
+        height: 100%;
+        overflow-y: auto;
+    }
+    
+    .nav-contain ul li {
+        width: 100%;
+        margin: 8px 0;
+        padding: 12px 16px;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+    
+    .nav-contain ul li:hover {
+        background-color: var(--hover-bg);
+    }
+    
+    .nav-contain ul li p {
+        display: inline;
+        margin-left: 10px;
+    }
+    
+    .logout {
+        width: 100%;
+        text-align: left;
+        margin-top: 20px;
+        padding: 12px 16px;
+    }
+    
+    .mobile-nav-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+    }
+    
+    .mobile-nav-overlay.active {
+        display: block;
+    }
+    
+    .mobile-nav-close {
+        display: none;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text-primary);
+        z-index: 1001;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+    }
+    
+    .mobile-nav-close:hover {
+        background-color: var(--hover-bg);
+    }
+    
+    .nav-contain.mobile-visible .mobile-nav-close {
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-container {
+        padding: 8px;
+    }
+    
+    .header-left h2 {
+        font-size: 18px;
+    }
+    
+    #menu-button {
+        margin: 8px;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .header-right {
+        gap: 8px;
+    }
+    
+    .header-right p {
+        display: none;
+    }
+    
+    .summary-card-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .summary-card {
+        padding: 15px;
+    }
+    
+    .summary-card h4 {
+        font-size: 14px;
+    }
+    
+    .search-box {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .filter-group {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .custom-select {
+        width: 100%;
+    }
+}
+
 @media (max-width: 600px) {
     .create_task_body {
         padding: 24px;
@@ -915,15 +1073,100 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     .task-form {
         max-width: 100%;
     }
+    
+    .summary-card-container {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .mian-button {
+        padding: 10px;
+        overflow-x: auto;
+    }
+    
+    .mian-button table {
+        font-size: 12px;
+        min-width: 600px;
+        width: 100%;
+    }
+    
+    .mian-button th,
+    .mian-button td {
+        padding: 8px 4px;
+        white-space: nowrap;
+    }
+    
+    .header-left h2 {
+        font-size: 16px;
+    }
+    
+    #menu-button {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
 }
 
-
+@media (max-width: 480px) {
+    .header-container {
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px;
+    }
+    
+    .header-left,
+    .header-right {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .summary-card-container {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        padding: 0 5px;
+    }
+    
+    .summary-card {
+        padding: 8px;
+        border-radius: 6px;
+    }
+    
+    .summary-card h4 {
+        font-size: 11px;
+        margin: 0;
+        line-height: 1.2;
+    }
+    
+    .summary-card span {
+        font-size: 14px;
+        font-weight: bold;
+    }
+    
+    .mian-button table {
+        font-size: 10px;
+    }
+    
+    .mian-button th,
+    .mian-button td {
+        padding: 6px 2px;
+    }
+    
+    .nav-contain ul {
+        padding: 5px;
+    }
+    
+    .nav-contain ul li {
+        margin: 2px;
+        padding: 8px;
+    }
+    
+    .nav-contain ul li i {
+        font-size: 16px;
+    }
+}
 
 .completed-rate {
     display: none;
-    padding: 30px;
 }
-/* Task Cards */
 #rate-cards {
   display: flex;
   flex-wrap: wrap;

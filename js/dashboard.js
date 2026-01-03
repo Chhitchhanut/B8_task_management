@@ -16,6 +16,8 @@ const nav = document.getElementById("nav");
 const headContent = document.getElementById("head_contain");
 const downIcon = document.getElementById('icon_down');
 const allCategory = document.getElementById('small-category');
+const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+const mobileNavClose = document.getElementById('mobileNavClose');
 
 const mainContentContainer = document.querySelector('.main-content-container');
 const body = document.body;
@@ -63,15 +65,55 @@ onAuthStateChanged(auth, (user) => {
 // MENU BUTTON LOGIC
 // ----------------------------
 function hideShowBtn() {
-    downIcon.style.display = 'none';
-    nav.classList.toggle('compact');
-    allCategory.style.display = 'none';
-    headContent.classList.toggle('hidden');
-    if (!nav.classList.contains('compact')) {
-        downIcon.style.display = 'block';
-        allCategory.style.display = 'block';
+    if (window.innerWidth <= 1024) {
+        // Mobile navigation toggle
+        nav.classList.toggle('mobile-hidden');
+        nav.classList.toggle('mobile-visible');
+        mobileNavOverlay.classList.toggle('active');
+        
+        // Prevent body scroll when mobile nav is open
+        if (nav.classList.contains('mobile-visible')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    } else {
+        // Desktop navigation toggle
+        downIcon.style.display = 'none';
+        nav.classList.toggle('compact');
+        allCategory.style.display = 'none';
+        headContent.classList.toggle('hidden');
+        if (!nav.classList.contains('compact')) {
+            downIcon.style.display = 'block';
+            allCategory.style.display = 'block';
+        }
     }
 }
+
+// Close mobile navigation when clicking overlay
+mobileNavOverlay.addEventListener('click', closeMobileNav);
+
+// Close mobile navigation when clicking the close button
+mobileNavClose.addEventListener('click', closeMobileNav);
+
+// Function to close mobile navigation
+function closeMobileNav() {
+    nav.classList.remove('mobile-visible');
+    nav.classList.add('mobile-hidden');
+    mobileNavOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 1024) {
+        // Reset mobile navigation styles when switching to desktop
+        nav.classList.remove('mobile-hidden', 'mobile-visible');
+        mobileNavOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+});
+
 menuButton.addEventListener("click", hideShowBtn);
 
 // ----------------------------
