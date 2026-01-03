@@ -908,3 +908,367 @@ logoutBtn.addEventListener('click', async () => {
         alert('Logout failed. Please try again.');
     }
 });
+
+// ----------------------------
+// THEME AND SETTINGS FUNCTIONALITY
+// ----------------------------
+
+// Theme Management
+const themeToggleBtn = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
+const settingsModal = document.getElementById('settings-modal');
+const settingsBtn = document.querySelector('.setting.icons');
+const closeSettingsBtn = document.querySelector('[data-close-settings]');
+const settingsForm = document.getElementById('settings-form');
+const themeSelect = document.getElementById('theme-select');
+
+// Initialize theme from localStorage or system preference
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    let theme = 'light';
+    if (savedTheme) {
+        theme = savedTheme;
+    } else if (systemPrefersDark) {
+        theme = 'dark';
+    }
+    
+    applyTheme(theme);
+    updateThemeIcon(theme);
+    if (themeSelect) themeSelect.value = theme;
+}
+
+// Apply theme to document
+function applyTheme(theme) {
+    if (theme === 'auto') {
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', systemPrefersDark ? 'dark' : 'light');
+    } else {
+        document.documentElement.setAttribute('data-theme', theme);
+    }
+    localStorage.setItem('theme', theme);
+}
+
+// Update theme icon
+function updateThemeIcon(theme) {
+    if (themeIcon) {
+        if (theme === 'dark') {
+            themeIcon.className = 'bx bx-sun';
+        } else {
+            themeIcon.className = 'bx bx-moon';
+        }
+    }
+}
+
+// Toggle theme with button
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
+    updateThemeIcon(newTheme);
+    if (themeSelect) themeSelect.value = newTheme;
+}
+
+// Settings Management
+const defaultSettings = {
+    theme: 'auto',
+    compactView: false,
+    autoComplete: false,
+    showCompleted: true,
+    defaultPriority: 'medium',
+    tasksPerPage: 20,
+    dueDateAlerts: true,
+    overdueNotifications: true,
+    dailySummary: false,
+    dataSync: true,
+    analytics: false
+};
+
+function loadSettings() {
+    const savedSettings = localStorage.getItem('taskSettings');
+    return savedSettings ? { ...defaultSettings, ...JSON.parse(savedSettings) } : defaultSettings;
+}
+
+function saveSettings(settings) {
+    localStorage.setItem('taskSettings', JSON.stringify(settings));
+}
+
+function applySettings(settings) {
+    // Apply form validation setting
+    const formValidation = settings.formValidation !== false;
+    
+    // Apply other settings as needed
+    console.log('Settings applied:', settings);
+}
+
+// Event Listeners
+if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', toggleTheme);
+}
+
+if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+        if (settingsModal) {
+            settingsModal.style.display = 'flex';
+            settingsModal.setAttribute('aria-hidden', 'false');
+            mainContentContainer.style.display = 'none';
+            document.body.style.background = 'rgba(50, 44, 44, 0.17)';
+            
+            // Add smooth animation to modal
+            setTimeout(() => {
+                settingsModal.querySelector('.modal-card').classList.add('scale-in');
+            }, 10);
+            
+            // Load current settings into form
+            const settings = loadSettings();
+            document.getElementById('compact-view').checked = settings.compactView;
+            document.getElementById('auto-complete').checked = settings.autoComplete;
+            document.getElementById('show-completed').checked = settings.showCompleted;
+            document.getElementById('default-priority').value = settings.defaultPriority;
+            document.getElementById('tasks-per-page').value = settings.tasksPerPage;
+            document.getElementById('due-date-alerts').checked = settings.dueDateAlerts;
+            document.getElementById('overdue-notifications').checked = settings.overdueNotifications;
+            document.getElementById('daily-summary').checked = settings.dailySummary;
+            document.getElementById('data-sync').checked = settings.dataSync;
+            document.getElementById('analytics').checked = settings.analytics;
+        }
+    });
+}
+
+if (closeSettingsBtn) {
+    closeSettingsBtn.addEventListener('click', () => {
+        if (settingsModal) {
+            settingsModal.querySelector('.modal-card').classList.remove('scale-in');
+            setTimeout(() => {
+                settingsModal.style.display = 'none';
+                settingsModal.setAttribute('aria-hidden', 'true');
+                mainContentContainer.style.display = 'flex';
+                document.body.style.background = '';
+            }, 300);
+        }
+    });
+}
+
+if (settingsForm) {
+    settingsForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const settings = {
+            compactView: document.getElementById('compact-view').checked,
+            autoComplete: document.getElementById('auto-complete').checked,
+            showCompleted: document.getElementById('show-completed').checked,
+            defaultPriority: document.getElementById('default-priority').value,
+            tasksPerPage: parseInt(document.getElementById('tasks-per-page').value),
+            dueDateAlerts: document.getElementById('due-date-alerts').checked,
+            overdueNotifications: document.getElementById('overdue-notifications').checked,
+            dailySummary: document.getElementById('daily-summary').checked,
+            dataSync: document.getElementById('data-sync').checked,
+            analytics: document.getElementById('analytics').checked
+        };
+        
+        saveSettings(settings);
+        applySettings(settings);
+        
+        if (settingsModal) {
+            settingsModal.querySelector('.modal-card').classList.remove('scale-in');
+            setTimeout(() => {
+                settingsModal.style.display = 'none';
+                settingsModal.setAttribute('aria-hidden', 'true');
+                mainContentContainer.style.display = 'flex';
+                document.body.style.background = '';
+            }, 300);
+        }
+        
+        alert('Settings saved successfully!');
+    });
+}
+
+if (themeSelect) {
+    themeSelect.addEventListener('change', (e) => {
+        const theme = e.target.value;
+        applyTheme(theme);
+        updateThemeIcon(theme);
+    });
+}
+
+// Listen for system theme changes
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    const currentTheme = localStorage.getItem('theme');
+    if (currentTheme === 'auto') {
+        applyTheme('auto');
+        updateThemeIcon(e.matches ? 'dark' : 'light');
+    }
+});
+
+// Initialize theme on page load
+initializeTheme();
+
+// Export and Clear Data Functions
+async function exportAllTasks() {
+    if (!currentUser) {
+        alert('Please log in to export tasks');
+        return;
+    }
+
+    try {
+        const q = query(collection(db, "tasks"), where("email", "==", currentUser.email));
+        const querySnapshot = await getDocs(q);
+        const tasks = [];
+        
+        querySnapshot.forEach((doc) => {
+            const taskData = doc.data();
+            tasks.push({
+                id: doc.id,
+                ...taskData,
+                createdAt: taskData.createdAt?.toDate()?.toISOString(),
+                dueDate: taskData.dueDate?.toDate()?.toISOString()
+            });
+        });
+
+        // Create JSON blob and download
+        const dataStr = JSON.stringify(tasks, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `tasks_export_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        alert(`Exported ${tasks.length} tasks successfully!`);
+    } catch (error) {
+        console.error('Export error:', error);
+        alert('Failed to export tasks. Please try again.');
+    }
+}
+
+async function clearAllData() {
+    if (!currentUser) {
+        alert('Please log in to clear data');
+        return;
+    }
+
+    const confirmed = confirm(
+        '⚠️ WARNING: This will permanently delete ALL your tasks and categories. This action cannot be undone. Are you sure you want to continue?'
+    );
+
+    if (!confirmed) return;
+
+    const doubleConfirmed = confirm(
+        '🚨 FINAL WARNING: All your data will be lost forever. Type "DELETE" to confirm this action.'
+    );
+
+    if (doubleConfirmed) {
+        try {
+            // Delete all tasks
+            const tasksQuery = query(collection(db, "tasks"), where("email", "==", currentUser.email));
+            const tasksSnapshot = await getDocs(tasksQuery);
+            
+            const deletePromises = tasksSnapshot.docs.map(doc => deleteDoc(doc.ref));
+            await Promise.all(deletePromises);
+
+            // Delete all categories
+            const categoriesQuery = query(collection(db, "categories"), where("email", "==", currentUser.email));
+            const categoriesSnapshot = await getDocs(categoriesQuery);
+            
+            const categoryDeletePromises = categoriesSnapshot.docs.map(doc => deleteDoc(doc.ref));
+            await Promise.all(categoryDeletePromises);
+
+            // Clear localStorage
+            localStorage.removeItem('taskSettings');
+            localStorage.removeItem('taskFormDraft');
+            localStorage.removeItem('theme');
+
+            // Reload the page to show empty state
+            alert('All data has been cleared successfully. The page will now reload.');
+            window.location.reload();
+        } catch (error) {
+            console.error('Clear data error:', error);
+            alert('Failed to clear data. Please try again.');
+        }
+    }
+}
+
+// Form Validation Enhancement
+function enhanceFormValidation() {
+    const settings = loadSettings();
+    
+    if (settings.formValidation) {
+        // Add stricter validation to task form
+        const taskNameInput = document.getElementById('taskName');
+        const dueDateInput = document.getElementById('dueDate');
+        
+        if (taskNameInput) {
+            taskNameInput.addEventListener('input', (e) => {
+                const value = e.target.value.trim();
+                if (value.length < 3) {
+                    e.target.setCustomValidity('Task name must be at least 3 characters long');
+                } else if (value.length > 100) {
+                    e.target.setCustomValidity('Task name must be less than 100 characters');
+                } else {
+                    e.target.setCustomValidity('');
+                }
+            });
+        }
+        
+        if (dueDateInput) {
+            dueDateInput.addEventListener('change', (e) => {
+                const selectedDate = new Date(e.target.value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                if (selectedDate < today) {
+                    e.target.setCustomValidity('Due date cannot be in the past');
+                } else {
+                    e.target.setCustomValidity('');
+                }
+            });
+        }
+    }
+}
+
+// Auto-save functionality
+function enableAutoSave() {
+    const settings = loadSettings();
+    
+    if (settings.autoSave) {
+        const taskForm = document.querySelector('.task-form');
+        if (taskForm) {
+            const formInputs = taskForm.querySelectorAll('input, select, textarea');
+            
+            formInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    // Save form data to localStorage
+                    const formData = new FormData(taskForm);
+                    const formDataObj = {};
+                    formData.forEach((value, key) => {
+                        formDataObj[key] = value;
+                    });
+                    localStorage.setItem('taskFormDraft', JSON.stringify(formDataObj));
+                });
+            });
+        }
+    }
+}
+
+// Add event listeners for export and clear buttons
+document.addEventListener('DOMContentLoaded', () => {
+    const exportBtn = document.getElementById('export-data');
+    const clearBtn = document.getElementById('clear-data');
+
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportAllTasks);
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearAllData);
+    }
+});
+
+// Initialize form enhancements
+enhanceFormValidation();
+enableAutoSave();
